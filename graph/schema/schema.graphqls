@@ -1,0 +1,32 @@
+scalar Float32
+scalar WeatherForecaster
+
+type Query {
+    currentWeather(input: CurrentWeatherInput): [Int]
+}
+
+
+input CurrentWeatherInput {
+    weatherForecaster: WeatherForecaster
+    locality: LocalityInput
+
+}
+
+input LocalityInput {
+    coordination: CoordinationInput
+    settlement: SettlementInput
+}
+
+
+input SettlementInput {
+    settlementName: String
+}
+
+input CoordinationInput {
+    latitude: Float32
+    longitude: Float32
+}
+
+type CurrentWeather {
+    date: String
+}
