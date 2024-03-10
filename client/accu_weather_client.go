@@ -1,33 +1,27 @@
 package client
 
 import (
-	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"strconv"
-	"weather-api/config"
 	"weather-api/dto"
-)
-
-var (
-	StatusCodeNot200 = errors.New("api returned code != 200 OK")
 )
 
 type AccuWeatherClient struct {
 	*Client
 }
 
-func NewAccuWeatherClient(log *logrus.Logger, httpClient *http.Client, cfg *config.WeatherApiKey) *AccuWeatherClient {
+func NewAccuWeatherClient(log *logrus.Logger, httpClient *http.Client, apiKey string) *AccuWeatherClient {
 	return &AccuWeatherClient{
-		NewClient("http://dataservice.accuweather.com/", log, httpClient, cfg),
+		NewClient("http://dataservice.accuweather.com/", log, httpClient, apiKey),
 	}
 }
 
 func (c *AccuWeatherClient) GetCurrentWeatherInfo(request dto.AccuWeatherRequestDto) (*dto.AccuWeatherCurrentResponseDto, error) {
 	var urlForRequest = c.BaseURL + fmt.Sprintf("currentconditions/v1/%s?", request.LocationKey) + c.getQueryParamsForRequest(request)
-	response, err := HttpGetAndGetResponse[[]*dto.AccuWeatherCurrentResponseDto](c.httpClient, c.log, urlForRequest)
+	response, err := HttpGetAndGetResponse[[]*dto.AccuWeatherCurrentResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
 
 	if err == nil {
 		return (*response)[0], err
@@ -38,18 +32,18 @@ func (c *AccuWeatherClient) GetCurrentWeatherInfo(request dto.AccuWeatherRequest
 
 func (c *AccuWeatherClient) GetHourlyWeatherInfo(request dto.AccuWeatherRequestDto) (*[]*dto.AccuWeatherHourlyResponseDto, error) {
 	var urlForRequest = c.BaseURL + fmt.Sprintf("forecasts/v1/hourly/12hour/%s?", request.LocationKey) + c.getQueryParamsForRequest(request)
-	return HttpGetAndGetResponse[[]*dto.AccuWeatherHourlyResponseDto](c.httpClient, c.log, urlForRequest)
+	return HttpGetAndGetResponse[[]*dto.AccuWeatherHourlyResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
 }
 
 func (c *AccuWeatherClient) GetDailyWeatherInfo(request dto.AccuWeatherRequestDto) (*dto.AccuWeatherDailyResponseDto, error) {
 	var urlForRequest = c.BaseURL + fmt.Sprintf("forecasts/v1/daily/5day/%s?", request.LocationKey) + c.getQueryParamsForRequest(request)
-	return HttpGetAndGetResponse[dto.AccuWeatherDailyResponseDto](c.httpClient, c.log, urlForRequest)
+	return HttpGetAndGetResponse[dto.AccuWeatherDailyResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
 
 }
 
 func (c *AccuWeatherClient) GetGeoPositionSearch(request dto.AccuWeatherGeoPositionRequestDto) (*dto.AccuWeatherGeoPositionResponseDto, error) {
 	var urlForRequest = c.BaseURL + "locations/v1/cities/geoposition/search?" + c.getQueryParamsForGeoPosition(request)
-	return HttpGetAndGetResponse[dto.AccuWeatherGeoPositionResponseDto](c.httpClient, c.log, urlForRequest)
+	return HttpGetAndGetResponse[dto.AccuWeatherGeoPositionResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
 }
 
 func (c *AccuWeatherClient) getQueryParamsForBase(request dto.AccuWeatherBaseRequestDto) url.Values {
@@ -75,5 +69,4 @@ func (c *AccuWeatherClient) getQueryParamsForGeoPosition(request dto.AccuWeather
 	queryParams.Add("q", q)
 
 	return queryParams.Encode()
-
 }

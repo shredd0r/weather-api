@@ -5,19 +5,16 @@ import (
 )
 
 type Config struct {
-	Port        int           `env:"PORT" envDefault:"8080"`
-	Logger      Logger        `envPrefix:"LOG_"`
-	AccuWeather WeatherApiKey `envPrefix:"ACCU_WEATHER_"`
-	OpenWeather WeatherApiKey `envPrefix:"OPEN_WEATHER_"`
-	WeatherApi  WeatherApiKey `envPrefix:"WEATHER_API_"`
+	Port              int    `env:"PORT" envDefault:"8080"`
+	Logger            Logger `envPrefix:"LOG_"`
+	AccuWeatherApiKey string `env:"ACCU_WEATHER_API_KEY"`
+	OpenWeatherApiKey string `env:"OPEN_WEATHER_API_KEY"`
+	WeatherApiApiKey  string `env:"WEATHER_API_API_KEY"`
+	ApiNinjasApiKey   string `env:"API_NINJAS_API_KEY"`
 }
 
 type Logger struct {
 	Level string `env:"LEVEL" envDefault:"INFO"`
-}
-
-type WeatherApiKey struct {
-	ApiKey string `env:"API_KEY"`
 }
 
 func ParseEnv() *Config {

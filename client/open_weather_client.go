@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"weather-api/config"
 	"weather-api/dto"
 )
 
@@ -13,20 +12,20 @@ type OpenWeatherClient struct {
 	*Client
 }
 
-func NewOpenWeatherClient(log *logrus.Logger, httpClient *http.Client, cfg *config.WeatherApiKey) *OpenWeatherClient {
+func NewOpenWeatherClient(log *logrus.Logger, httpClient *http.Client, apiKey string) *OpenWeatherClient {
 	return &OpenWeatherClient{
-		NewClient("https://api.openweathermap.org/", log, httpClient, cfg),
+		NewClient("https://api.openweathermap.org/", log, httpClient, apiKey),
 	}
 }
 
 func (c *OpenWeatherClient) GetCurrentWeatherInfo(request dto.OpenWeatherRequestDto) (*dto.OpenWeatherCurrentWeatherResponseDto, error) {
 	urlForRequest := c.BaseURL + "data/2.5/weather?" + c.getQueryParamByRequest(request).Encode()
-	return HttpGetAndGetResponse[dto.OpenWeatherCurrentWeatherResponseDto](c.httpClient, c.log, urlForRequest)
+	return HttpGetAndGetResponse[dto.OpenWeatherCurrentWeatherResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
 }
 
 func (c *OpenWeatherClient) GetForecastWeatherInfo(request dto.OpenWeatherForecastRequestDto) (*dto.OpenWeatherHourlyWeatherResponseDto, error) {
 	urlForRequest := c.BaseURL + "data/2.5/forecast?" + c.getQueryParamsForForecast(request)
-	return HttpGetAndGetResponse[dto.OpenWeatherHourlyWeatherResponseDto](c.httpClient, c.log, urlForRequest)
+	return HttpGetAndGetResponse[dto.OpenWeatherHourlyWeatherResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
 
 }
 

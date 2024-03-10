@@ -43,7 +43,7 @@ func getOpenWeatherForecastRequestDto() dto.OpenWeatherForecastRequestDto {
 
 func initOpenWeatherTest(t *testing.T) *client.OpenWeatherClient {
 	cfg := config.ParseEnv()
-	if cfg.OpenWeather.ApiKey == "" {
+	if cfg.OpenWeatherApiKey == "" {
 		t.Skip("skip test because api key not set")
 	}
 	log := logger.NewLogger(cfg.Logger)
@@ -51,5 +51,5 @@ func initOpenWeatherTest(t *testing.T) *client.OpenWeatherClient {
 	return client.NewOpenWeatherClient(
 		log,
 		client.NewHttpClient(log),
-		&cfg.OpenWeather)
+		cfg.OpenWeatherApiKey)
 }
