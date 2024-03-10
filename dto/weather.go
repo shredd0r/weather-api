@@ -2,16 +2,13 @@ package dto
 
 type CurrentWeatherDto struct {
 	CityName            string
-	DayOfWeek           string
+	EpochTime           string
 	Visibility          string
-	Month               string
-	Day                 int
-	CurrentWeather      float32
+	CurrentTemperature  float32
 	MinTemperature      float32
 	MaxTemperature      float32
 	FillLikeTemperature float32
 	IconResource        string
-	LastUpdate          int64
 }
 
 type HourlyDetailWeatherDto struct {
@@ -38,3 +35,12 @@ type DailyWeatherDto struct {
 	DayOfWeek          int
 	IconResource       string
 }
+
+type WeatherForecaster string
+
+const (
+	WeatherForecasterUnspecified = ""
+	WeatherForecasterAccuWeather = "AccuWeather"
+	WeatherForecasterOpenWeather = "OpenWeather"
+	WeatherForecasterWeatherApi  = "WeatherApi"
+)

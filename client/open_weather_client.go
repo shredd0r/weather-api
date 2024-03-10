@@ -1,25 +1,25 @@
 package client
 
 import (
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"weather-api/dto"
 )
 
 type OpenWeatherClient struct {
-	client *Client
+	*Client
 }
 
-func NewOpenWeatherClient(logger *log.Logger, httpClient *http.Client) *AccuWeatherClient {
+func NewOpenWeatherClient(logger *logrus.Logger, httpClient *http.Client) *AccuWeatherClient {
 	return &AccuWeatherClient{
-		client: NewClient("https://api.openweathermap.org/", logger, httpClient),
+		NewClient("https://api.openweathermap.org/", logger, httpClient),
 	}
 }
 
-func (client *Client) GetCurrentWeatherInfo(request dto.OpenWeatherRequestDto) (*dto.OpenWeatherCurrentWeatherResponseDto, error) {
+func (c *Client) GetCurrentWeatherInfo(request dto.OpenWeatherRequestDto) (*dto.OpenWeatherCurrentWeatherResponseDto, error) {
 	return nil, nil
 }
 
-func (client *Client) GetForecastWeatherInfo(request dto.OpenWeatherRequestDto) (*dto.OpenWeatherHourlyWeatherResponseDto, error) {
+func (c *Client) GetForecastWeatherInfo(request dto.OpenWeatherRequestDto) (*dto.OpenWeatherHourlyWeatherResponseDto, error) {
 	return nil, nil
 }

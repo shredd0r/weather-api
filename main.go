@@ -1,28 +1,52 @@
-package weather_api
+package main
 
 import (
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
-	"os"
-	"weather-api/graph"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"weather-api/client"
+	"weather-api/dto"
 )
 
-const defaultPort = "8080"
-
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
+	logger := NewLogger()
+
+	httpClient := &http.Client{
+		Transport: &client.LoggingTransport{
+			Logger:    logger,
+			Transport: http.DefaultTransport,
+		},
 	}
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	c := client.NewAccuWeatherClient(logger, httpClient)
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	c.GetDailyWeatherInfo(
+		dto.AccuWeatherRequestDto{
+			AccuWeatherBaseRequestDto: dto.AccuWeatherBaseRequestDto{
+				AppKey:   "rIvOy0yPABlbkQ9dX1OAwGxwkA4p81hi",
+				Language: "uk",
+				Details:  true,
+				Metric:   true,
+			},
+			LocationKey: "1212408",
+		})
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	//port := os.Getenv("PORT")
+	//if port == "" {
+	//	port = defaultPort
+	//}
+	//
+	//srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	//
+	//http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	//http.Handle("/query", srv)
+	//
+	//log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	//log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func NewLogger() *logrus.Logger {
+	logger := logrus.StandardLogger()
+	logger.SetLevel(logrus.Level(6))
+
+	return logger
 }

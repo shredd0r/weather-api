@@ -18,6 +18,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/redis/go-redis/v9 v9.4.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sosodev/duration v1.1.0 // indirect
 	github.com/urfave/cli/v2 v2.25.5 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect

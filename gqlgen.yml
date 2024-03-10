@@ -87,4 +87,4 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
   WeatherForecaster:
     model:
-      - github.com/shredd0r/weather-api/model.WeatherForecaster
+      - github.com/shredd0r/weather-api/dto.WeatherForecaster
