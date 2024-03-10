@@ -5,18 +5,30 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"weather-api/config"
 )
 
 type Client struct {
 	BaseURL    string
-	logger     *logrus.Logger
+	apiKey     string
+	log        *logrus.Logger
 	httpClient *http.Client
 }
 
-func NewClient(baseUrlString string, logger *logrus.Logger, httpClient *http.Client) *Client {
+func NewHttpClient(log *logrus.Logger) *http.Client {
+	return &http.Client{
+		Transport: &LoggingTransport{
+			log:       log,
+			Transport: http.DefaultTransport,
+		},
+	}
+}
+
+func NewClient(baseUrlString string, log *logrus.Logger, httpClient *http.Client, cfg *config.WeatherApiKey) *Client {
 	return &Client{
 		BaseURL:    baseUrlString,
-		logger:     logger,
+		apiKey:     cfg.ApiKey,
+		log:        log,
 		httpClient: httpClient,
 	}
 }
@@ -31,4 +43,22 @@ func ResponseBodyDecoder[T any](r io.ReadCloser) T {
 	}
 
 	return responseBody
+}
+
+func HttpGetAndGetResponse[T any](httpClient *http.Client, log *logrus.Logger, urlForRequest string) (*T, error) {
+	response, err := httpClient.Get(urlForRequest)
+
+	defer response.Body.Close()
+
+	if err != nil {
+		log.Infof("error from request: %s", err)
+		return nil, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, StatusCodeNot200
+	}
+
+	responseBody := ResponseBodyDecoder[T](response.Body)
+	return &responseBody, nil
 }

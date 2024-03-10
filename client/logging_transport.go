@@ -8,7 +8,7 @@ import (
 )
 
 type LoggingTransport struct {
-	Logger    *logrus.Logger
+	log       *logrus.Logger
 	Transport http.RoundTripper
 }
 
@@ -28,15 +28,15 @@ func (t *LoggingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 }
 
 func (t *LoggingTransport) requestLogging(req *http.Request) {
-	t.Logger.Infof("Request: %s %s", req.Method, req.Host)
-	t.Logger.Debugf("Url: %s", req.URL)
+	t.log.Infof("Request: %s %s", req.Method, req.Host)
+	t.log.Debugf("Url: %s", req.URL)
 }
 
 func (t *LoggingTransport) responseLogging(res *http.Response) {
-	t.Logger.Infof("Response: %s", res.Status)
+	t.log.Infof("Response: %s", res.Status)
+	defer res.Body.Close()
 
 	if res.StatusCode == http.StatusOK {
-		defer res.Body.Close()
 		bytesBody, err := io.ReadAll(res.Body)
 
 		if err != nil {
@@ -44,6 +44,6 @@ func (t *LoggingTransport) responseLogging(res *http.Response) {
 		}
 
 		res.Body = io.NopCloser(bytes.NewReader(bytesBody))
-		t.Logger.Debugf("Body: %s", string(bytesBody))
+		t.log.Debugf("Body: %s", string(bytesBody))
 	}
 }

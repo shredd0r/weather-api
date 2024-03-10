@@ -1,40 +1,36 @@
 package dto
 
-type BaseOpenWeatherRequestDto struct {
-	Latitude  float32
-	Longitude float32
-	AppKey    string
+type OpenWeatherRequestDto struct {
+	Latitude  float64 `json:"lat"`
+	Longitude float64 `json:"lon"`
+	Units     string
+	Language  string `json:"lang"`
 }
 
-type OpenWeatherRequestDto struct {
-	BaseOpenWeatherRequestDto
-	Units    *string
-	Language *string
+type OpenWeatherForecastRequestDto struct {
+	OpenWeatherRequestDto
+	Count int `json:"cnt"`
 }
 
 type OpenWeatherCurrentWeatherResponseDto struct {
-	CoordinationDto               OpenWeatherCoordinationDto `json:"coord"`
-	Weather                       *[]OpenWeatherWeatherInfoDto
-	Base                          string
-	Main                          OpenWeatherMainInfoDto
-	Visibility                    int
-	Wind                          *OpenWeatherWindInfoDto
-	Clouds                        *OpenWeatherCloudInfoDto
-	Rain                          *OpenWeatherPrecipitationInfoDto
-	Snow                          *OpenWeatherPrecipitationInfoDto
-	DatetimeOfCalculationResponse int                      `json:"dt"`
-	SystemInfo                    OpenWeatherSystemInfoDto `json:"sys"`
-	Timezone                      int
-	Id                            int
-	CityName                      string `json:"city"`
-	cod                           int
+	CoordinationDto OpenWeatherCoordinationDto `json:"coord"`
+	Weather         []OpenWeatherWeatherInfoDto
+	Base            string
+	Main            OpenWeatherMainInfoDto
+	Visibility      int
+	Wind            OpenWeatherWindInfoDto
+	Clouds          OpenWeatherCloudInfoDto
+	Rain            OpenWeatherPrecipitationInfoDto
+	Snow            OpenWeatherPrecipitationInfoDto
+	EpochTime       int64                    `json:"dt"`
+	SystemInfo      OpenWeatherSystemInfoDto `json:"sys"`
+	Timezone        int64
 }
 
 type OpenWeatherHourlyWeatherResponseDto struct {
 	Cod            string
-	Message        int
 	Cnt            int
-	ListHourlyInfo *[]OpenWeatherHourlyInfoDto  `json:"list"`
+	ListHourlyInfo []OpenWeatherForecastInfoDto `json:"list"`
 	CityInfo       OpenWeatherCityInfoDetailDto `json:"city"`
 }
 
@@ -67,7 +63,7 @@ type OpenWeatherCoordinationDto struct {
 	Latitude  *float32 `json:"lat"`
 }
 
-type OpenWeatherHourlyInfoDto struct {
+type OpenWeatherForecastInfoDto struct {
 	Visibility                 int
 	DateTimeForecast           int                              `json:"dt"`
 	MainInfo                   OpenWeatherMainInfoDto           `json:"main"`
@@ -82,12 +78,12 @@ type OpenWeatherHourlyInfoDto struct {
 }
 
 type OpenWeatherMainInfoDto struct {
-	Temperature    *float32 `json:"temp"`
-	FeelsLike      *float32 `json:"feels_like"`
-	MinTemperature *float32 `json:"temp_min"`
-	MaxTemperature *float32 `json:"temp_max"`
-	Pressure       *float32
-	Humidity       *int
+	Temperature    float32 `json:"temp"`
+	FeelsLike      float32 `json:"feels_like"`
+	MinTemperature float32 `json:"temp_min"`
+	MaxTemperature float32 `json:"temp_max"`
+	Pressure       float32
+	Humidity       int
 }
 
 type OpenWeatherPrecipitationInfoDto struct {
@@ -96,23 +92,23 @@ type OpenWeatherPrecipitationInfoDto struct {
 }
 
 type OpenWeatherWeatherInfoDto struct {
-	Id          *int
-	Main        *string
-	Description *string
-	Icon        *string
+	Id          int
+	Main        string
+	Description string
+	Icon        string
 }
 
 type OpenWeatherWindInfoDto struct {
-	Speed   *float32
-	Degrees *float32 `json:"deg"`
-	gust    *float32
+	Speed   float32
+	Degrees float32 `json:"deg"`
+	Gust    float32
 }
 
 type OpenWeatherSystemInfoDto struct {
-	Type    *int
-	Id      *int
-	Message *float32
-	Country *string
-	Sunrise *int
-	Sunset  *int
+	Type    int
+	Id      int
+	Message float32
+	Country string
+	Sunrise int
+	Sunset  int
 }

@@ -1,7 +1,6 @@
 package dto
 
 type AccuWeatherBaseRequestDto struct {
-	AppKey   string
 	Language string
 	Metric   bool
 	Details  bool
@@ -16,7 +15,7 @@ type AccuWeatherCurrentResponseDto struct {
 	EpochTime           int64
 	WeatherText         string
 	WeatherIcon         uint8
-	PrecipitationType   string
+	PrecipitationType   PrecipitationType
 	Temperature         AccuWeatherIndicationInfoDto
 	RealFeelTemperature AccuWeatherIndicationInfoDto
 	UVIndex             uint8
@@ -116,10 +115,11 @@ type AccuWeatherGeoPositionResponseDto struct {
 	Key     string
 }
 
-type PrecipitationType int
+type PrecipitationType string
 
 const (
-	Rain = iota
-	Snow
-	Ice
+	Empty = ""
+	Rain  = "Rain"
+	Snow  = "Snow"
+	Ice   = "Ice"
 )
