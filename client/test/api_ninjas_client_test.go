@@ -18,9 +18,25 @@ func TestApiNinjasGetGeocodingInfo(t *testing.T) {
 
 }
 
+func TestApiNinjasGetReverseGeocodingInfo(t *testing.T) {
+	c := initApiNinjasTest(t)
+	response, err := c.GetReversGeocoding(getApiNinjasGetReverseGeocodingRequest())
+
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+
+}
+
 func getApiNinjasGetGeocodingRequest() dto.ApiNinjasGeocodingRequestDto {
 	return dto.ApiNinjasGeocodingRequestDto{
 		City: "Kharkiv",
+	}
+}
+
+func getApiNinjasGetReverseGeocodingRequest() dto.ApiNinjasReverseGeocodingRequestDto {
+	return dto.ApiNinjasReverseGeocodingRequestDto{
+		Latitude:  44.5888,
+		Longitude: 33.5224,
 	}
 }
 

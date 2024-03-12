@@ -49,6 +49,13 @@ func ResponseBodyDecoder[T any](r io.ReadCloser) T {
 	return responseBody
 }
 
+func GetFirstElemFromResponse[T any](arrayT *[]*T, err error) (*T, error) {
+	if err == nil {
+		return (*arrayT)[0], nil
+	}
+	return nil, err
+}
+
 func HttpGetAndGetResponse[T any](httpClient *http.Client, log *logrus.Logger, request *http.Request) (*T, error) {
 	response, err := httpClient.Do(request)
 

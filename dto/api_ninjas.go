@@ -13,3 +13,14 @@ type ApiNinjasGeocodingResponseDto struct {
 	Country   string
 	State     string
 }
+
+type ApiNinjasReverseGeocodingRequestDto struct {
+	Latitude  float32
+	Longitude float32
+}
+
+type ApiNinjasReverseGeocodingResponseDto struct {
+	Country string
+	Name    string
+	State   string
+}
