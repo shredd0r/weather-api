@@ -3,7 +3,7 @@ package test
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"weather-api/client"
+	"weather-api/client/http"
 	"weather-api/config"
 	"weather-api/dto"
 	"weather-api/logger"
@@ -40,15 +40,15 @@ func getApiNinjasGetReverseGeocodingRequest() dto.ApiNinjasReverseGeocodingReque
 	}
 }
 
-func initApiNinjasTest(t *testing.T) *client.ApiNinjasClient {
+func initApiNinjasTest(t *testing.T) *http.ApiNinjasClient {
 	cfg := config.ParseEnv()
 	if cfg.ApiNinjasApiKey == "" {
 		t.Skip("skip test because api key not set")
 	}
 	log := logger.NewLogger(cfg.Logger)
 
-	return client.NewApiNinjasClient(
+	return http.NewApiNinjasClient(
 		log,
-		client.NewHttpClient(log),
+		http.NewHttpClient(log),
 		cfg.ApiNinjasApiKey)
 }

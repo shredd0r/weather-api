@@ -3,7 +3,7 @@ package test
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"weather-api/client"
+	"weather-api/client/http"
 	"weather-api/config"
 	"weather-api/dto"
 	"weather-api/logger"
@@ -41,15 +41,15 @@ func getOpenWeatherForecastRequestDto() dto.OpenWeatherForecastRequestDto {
 	}
 }
 
-func initOpenWeatherTest(t *testing.T) *client.OpenWeatherClient {
+func initOpenWeatherTest(t *testing.T) *http.OpenWeatherClient {
 	cfg := config.ParseEnv()
 	if cfg.OpenWeatherApiKey == "" {
 		t.Skip("skip test because api key not set")
 	}
 	log := logger.NewLogger(cfg.Logger)
 
-	return client.NewOpenWeatherClient(
+	return http.NewOpenWeatherClient(
 		log,
-		client.NewHttpClient(log),
+		http.NewHttpClient(log),
 		cfg.OpenWeatherApiKey)
 }
