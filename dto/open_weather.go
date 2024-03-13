@@ -34,9 +34,6 @@ type OpenWeatherHourlyWeatherResponseDto struct {
 	CityInfo       OpenWeatherCityInfoDetailDto `json:"city"`
 }
 
-type OpenWeatherDailyWeatherResponseDto struct {
-}
-
 type OpenWeatherCityInfoDetailDto struct {
 	Id           int
 	Name         string
