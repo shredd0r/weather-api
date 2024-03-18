@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"weather-api/dto"
+	"weather-api/util"
 )
 
 type OpenWeatherClient struct {
@@ -32,8 +33,8 @@ func (c *OpenWeatherClient) GetForecastWeatherInfo(request dto.OpenWeatherForeca
 func (c *OpenWeatherClient) getQueryParamByRequest(request dto.OpenWeatherRequestDto) url.Values {
 	queryParams := url.Values{
 		"appid": {c.apiKey},
-		"lat":   {strconv.FormatFloat(request.Latitude, 'f', -1, 64)},
-		"lon":   {strconv.FormatFloat(request.Longitude, 'f', -1, 64)},
+		"lat":   {util.Float64ToString(request.Latitude)},
+		"lon":   {util.Float64ToString(request.Longitude)},
 		"units": {request.Units},
 		"lang":  {request.Language},
 	}

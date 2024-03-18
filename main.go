@@ -1,21 +1,39 @@
 package main
 
 import (
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"log"
-	"net/http"
-	"weather-api/graph"
+	"context"
+	"weather-api/client/http"
+	"weather-api/client/redis"
+	"weather-api/config"
+	"weather-api/logger"
+	"weather-api/provider"
+	"weather-api/repository"
 )
 
 func main() {
-	port := "8080"
+	ctx := context.Background()
+	cfg := config.ParseEnv()
+	log := logger.NewLogger(cfg.Logger)
+	rClient := redis.NewClient(&ctx, cfg.Redis)
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	p := provider.NewAccuWeatherProvider(
+		repository.NewRedisCurrentWeatherRepository(log, rClient, cfg.ExpirationDuration),
+		http.NewAccuWeatherClient(
+			log,
+			http.NewHttpClient(log),
+			cfg.AccuWeatherApiKey),
+		log,
+	)
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	p.CurrentWeatherInfo("123")
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	//port := "8080"
+	//
+	//srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	//
+	//http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	//http.Handle("/query", srv)
+	//
+	//log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	//log.Fatal(http.ListenAndServe(":"+port, nil))
 }

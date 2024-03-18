@@ -30,9 +30,9 @@ func (c *AccuWeatherClient) GetCurrentWeatherInfo(request dto.AccuWeatherRequest
 	return nil, err
 }
 
-func (c *AccuWeatherClient) GetHourlyWeatherInfo(request dto.AccuWeatherRequestDto) (*[]*dto.AccuWeatherHourlyResponseDto, error) {
+func (c *AccuWeatherClient) GetHourlyWeatherInfo(request dto.AccuWeatherRequestDto) (*[]dto.AccuWeatherHourlyResponseDto, error) {
 	var urlForRequest = c.BaseURL + fmt.Sprintf("forecasts/v1/hourly/12hour/%s?", request.LocationKey) + c.getQueryParamsForRequest(request)
-	return HttpGetAndGetResponse[[]*dto.AccuWeatherHourlyResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
+	return HttpGetAndGetResponse[[]dto.AccuWeatherHourlyResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
 }
 
 func (c *AccuWeatherClient) GetDailyWeatherInfo(request dto.AccuWeatherRequestDto) (*dto.AccuWeatherDailyResponseDto, error) {

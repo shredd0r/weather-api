@@ -4,8 +4,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
-	"strconv"
 	"weather-api/dto"
+	"weather-api/util"
 )
 
 type ApiNinjasClient struct {
@@ -51,7 +51,7 @@ func (c *ApiNinjasClient) getQueryParams(request dto.ApiNinjasGeocodingRequestDt
 
 func (c *ApiNinjasClient) getQueryParamsForReverse(request dto.ApiNinjasReverseGeocodingRequestDto) string {
 	return url.Values{
-		"lat": {strconv.FormatFloat(float64(request.Latitude), 'f', -1, 64)},
-		"lon": {strconv.FormatFloat(float64(request.Longitude), 'f', -1, 64)},
+		"lat": {util.Float64ToString(request.Latitude)},
+		"lon": {util.Float64ToString(request.Longitude)},
 	}.Encode()
 }

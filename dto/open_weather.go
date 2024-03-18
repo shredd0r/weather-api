@@ -56,8 +56,8 @@ type OpenWeatherCloudInfoDto struct {
 }
 
 type OpenWeatherCoordinationDto struct {
-	Longitude *float32 `json:"lon"`
-	Latitude  *float32 `json:"lat"`
+	Longitude *float64 `json:"lon"`
+	Latitude  *float64 `json:"lat"`
 }
 
 type OpenWeatherForecastInfoDto struct {
@@ -67,7 +67,7 @@ type OpenWeatherForecastInfoDto struct {
 	WeatherInfos               *[]OpenWeatherWeatherInfoDto     `json:"weather"`
 	CloudInfo                  OpenWeatherCloudInfoDto          `json:"clouds"`
 	WindInfo                   OpenWeatherWindInfoDto           `json:"wind"`
-	ProbabilityOfPrecipitation float32                          `json:"pop"`
+	ProbabilityOfPrecipitation float64                          `json:"pop"`
 	PrecipitationInfoForRain   *OpenWeatherPrecipitationInfoDto `json:"rain"`
 	PrecipitationInfoForSnow   *OpenWeatherPrecipitationInfoDto `json:"snow"`
 	SystemInfo                 OpenWeatherSystemInfoDto         `json:"sys"`
@@ -75,17 +75,17 @@ type OpenWeatherForecastInfoDto struct {
 }
 
 type OpenWeatherMainInfoDto struct {
-	Temperature    float32 `json:"temp"`
-	FeelsLike      float32 `json:"feels_like"`
-	MinTemperature float32 `json:"temp_min"`
-	MaxTemperature float32 `json:"temp_max"`
-	Pressure       float32
+	Temperature    float64 `json:"temp"`
+	FeelsLike      float64 `json:"feels_like"`
+	MinTemperature float64 `json:"temp_min"`
+	MaxTemperature float64 `json:"temp_max"`
+	Pressure       float64
 	Humidity       int
 }
 
 type OpenWeatherPrecipitationInfoDto struct {
-	VolumeLastOneHour   *float32 `json:"1h"`
-	VolumeLastThreeHour *float32 `json:"3h"`
+	VolumeLastOneHour   *float64 `json:"1h"`
+	VolumeLastThreeHour *float64 `json:"3h"`
 }
 
 type OpenWeatherWeatherInfoDto struct {
@@ -96,15 +96,15 @@ type OpenWeatherWeatherInfoDto struct {
 }
 
 type OpenWeatherWindInfoDto struct {
-	Speed   float32
-	Degrees float32 `json:"deg"`
-	Gust    float32
+	Speed   float64
+	Degrees float64 `json:"deg"`
+	Gust    float64
 }
 
 type OpenWeatherSystemInfoDto struct {
 	Type    int
 	Id      int
-	Message float32
+	Message float64
 	Country string
 	Sunrise int
 	Sunset  int

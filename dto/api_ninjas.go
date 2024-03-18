@@ -8,15 +8,15 @@ type ApiNinjasGeocodingRequestDto struct {
 
 type ApiNinjasGeocodingResponseDto struct {
 	Name      string
-	Latitude  float32
-	Longitude float32
+	Latitude  float64
+	Longitude float64
 	Country   string
 	State     string
 }
 
 type ApiNinjasReverseGeocodingRequestDto struct {
-	Latitude  float32
-	Longitude float32
+	Latitude  float64
+	Longitude float64
 }
 
 type ApiNinjasReverseGeocodingResponseDto struct {

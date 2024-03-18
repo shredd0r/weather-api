@@ -19,7 +19,7 @@ func TestSaveCurrentWeatherEntity(t *testing.T) {
 
 	err := r.Save(cityName, entity.CurrentWeatherEntity{
 		EpochTime:           time.Now().UnixMilli(),
-		Visibility:          "visibility",
+		Visibility:          0.123,
 		CurrentTemperature:  10.24,
 		MinTemperature:      -4.2,
 		MaxTemperature:      25.13,

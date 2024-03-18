@@ -25,17 +25,20 @@ type AccuWeatherCurrentResponseDto struct {
 }
 
 type AccuWeatherHourlyResponseDto struct {
-	EpochDateTime            int64
-	WeatherIcon              int
+	EpochTime                int64
+	WeatherIcon              uint8
 	IconPhrase               string
 	Temperature              AccuWeatherValueInfoDto
 	RealFeelTemperature      AccuWeatherValueInfoDto
 	Wind                     AccuWeatherWindInfoDto
 	UVIndex                  uint8
+	HasPrecipitation         bool
+	PrecipitationType        PrecipitationType
 	PrecipitationProbability int
 	RainProbability          uint
 	SnowProbability          uint
 	IceProbability           uint
+	TotalLiquid              AccuWeatherValueInfoDto
 	Rain                     AccuWeatherValueInfoDto
 	Snow                     AccuWeatherValueInfoDto
 	Ice                      AccuWeatherValueInfoDto
@@ -83,9 +86,14 @@ type AccuWeatherDailyForecastDto struct {
 }
 
 type AccuWeatherDayInfoDto struct {
-	Icon             uint8
-	IconPhrase       string
-	HasPrecipitation bool
+	Icon                     uint8
+	IconPhrase               string
+	HasPrecipitation         bool
+	PrecipitationType        PrecipitationType
+	PrecipitationProbability int
+	Wind                     AccuWeatherWindInfoDto
+	TotalLiquid              AccuWeatherValueInfoDto
+	RelativeHumidity         AccuWeatherRelativeHumidity
 }
 
 type AccuWeatherIndicationInfoDto struct {
@@ -99,15 +107,21 @@ type AccuWeatherTemperatureDto struct {
 }
 
 type AccuWeatherValueInfoDto struct {
-	Value    *float32
+	Value    float64
 	Unit     string
 	UnitType int
 }
 
+type AccuWeatherRelativeHumidity struct {
+	Minimum int
+	Maximum int
+	Average int
+}
+
 type AccuWeatherGeoPositionRequestDto struct {
 	AccuWeatherBaseRequestDto
-	Latitude  float32
-	Longitude float32
+	Latitude  float64
+	Longitude float64
 }
 
 type AccuWeatherGeoPositionResponseDto struct {
@@ -118,8 +132,8 @@ type AccuWeatherGeoPositionResponseDto struct {
 type PrecipitationType string
 
 const (
-	Empty = ""
-	Rain  = "Rain"
-	Snow  = "Snow"
-	Ice   = "Ice"
+	PrecipitationTypeEmpty = ""
+	PrecipitationTypeRain  = "Rain"
+	PrecipitationTypeSnow  = "Snow"
+	PrecipitationTypeIce   = "Ice"
 )

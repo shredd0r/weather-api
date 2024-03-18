@@ -1,3 +1,4 @@
+scalar Int64
 scalar Float32
 scalar WeatherForecaster
 
@@ -28,5 +29,11 @@ input CoordinationInput {
 }
 
 type CurrentWeather {
-    date: String
+    epochTime: Int64
+    visibility: String
+    currentTemperature: Float32
+    minTemperature: Float32
+    maxTemperature: Float32
+    fillLikeTemperature: Float32
+    iconResource: String
 }

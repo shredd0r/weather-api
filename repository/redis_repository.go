@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	redisgo "github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"weather-api/client/redis"
 	"weather-api/config"
@@ -12,6 +13,10 @@ var (
 	ErrUnmarshal       = "unmarshal entity from redis response error"
 	ErrMarshal         = "marshal entity error"
 	ErrFromRedisFormat = "error from redisClient: %s"
+)
+
+var (
+	prefixKey = "WeatherApi:"
 )
 
 type RedisRepository[ENTITY any] struct {
@@ -28,10 +33,14 @@ func newRedisRepository[ENTITY any](log *logrus.Logger, client *redis.Client, cf
 	}
 }
 
-func (r *RedisRepository[ENTITY]) Get(cityName string) (*ENTITY, error) {
-	value, err := r.client.Get(cityName)
+func (r *RedisRepository[ENTITY]) Get(key string) (*ENTITY, error) {
+	value, err := r.client.Get(addPrefix(key))
 
 	r.log.Debugf("returned value from redis: %s", value)
+
+	if err == redisgo.Nil {
+		return nil, ErrNotFound
+	}
 
 	if err != nil {
 		r.log.Debugf(ErrFromRedisFormat, err)
@@ -47,14 +56,14 @@ func (r *RedisRepository[ENTITY]) Get(cityName string) (*ENTITY, error) {
 	return &e, nil
 }
 
-func (r *RedisRepository[ENTITY]) Save(cityName string, e ENTITY) error {
+func (r *RedisRepository[ENTITY]) Save(key string, e ENTITY) error {
 	byteArrayEntity, err := json.Marshal(e)
 
 	if err != nil {
 		panic(ErrMarshal)
 	}
 
-	if err := r.client.Set(cityName, string(byteArrayEntity), r.cfg.WeatherInfo); err != nil {
+	if err := r.client.Set(addPrefix(key), string(byteArrayEntity), 0); err != nil {
 		r.log.Debugf(ErrFromRedisFormat, err)
 		return err
 	}
@@ -62,7 +71,11 @@ func (r *RedisRepository[ENTITY]) Save(cityName string, e ENTITY) error {
 	return nil
 }
 
-func (r *RedisRepository[ENTITY]) Delete(cityName string) error {
+func addPrefix(key string) string {
+	return prefixKey + key
+}
+
+func (r *RedisRepository[ENTITY]) Delete(key string) error {
 	return nil
 }
 
@@ -76,16 +89,16 @@ func NewRedisCurrentWeatherRepository(log *logrus.Logger, client *redis.Client, 
 	}
 }
 
-func (r *RedisCurrentWeatherRepository) Get(cityName string) (*entity.CurrentWeatherEntity, error) {
-	return r.Get(cityName)
+func (r *RedisCurrentWeatherRepository) Get(key string) (*entity.CurrentWeatherEntity, error) {
+	return r.RedisRepository.Get(key)
 }
 
-func (r *RedisCurrentWeatherRepository) Save(cityName string, currentWeatherEntity entity.CurrentWeatherEntity) error {
-	return r.Save(cityName, currentWeatherEntity)
+func (r *RedisCurrentWeatherRepository) Save(key string, currentWeatherEntity entity.CurrentWeatherEntity) error {
+	return r.RedisRepository.Save(key, currentWeatherEntity)
 }
 
-func (r *RedisCurrentWeatherRepository) Delete(cityName string) error {
-	return r.Delete(cityName)
+func (r *RedisCurrentWeatherRepository) Delete(key string) error {
+	return r.RedisRepository.Delete(key)
 }
 
 type RedisHourlyWeatherRepository struct {
@@ -98,16 +111,16 @@ func NewRedisHourlyWeatherRepository(log *logrus.Logger, client *redis.Client, c
 	}
 }
 
-func (r *RedisHourlyWeatherRepository) Get(cityName string) (*[]entity.HourlyWeatherEntity, error) {
-	return r.Get(cityName)
+func (r *RedisHourlyWeatherRepository) Get(key string) (*[]entity.HourlyWeatherEntity, error) {
+	return r.Get(key)
 }
 
-func (r *RedisHourlyWeatherRepository) Save(cityName string, hourlyWeatherEntityArr []entity.HourlyWeatherEntity) error {
-	return r.Save(cityName, hourlyWeatherEntityArr)
+func (r *RedisHourlyWeatherRepository) Save(key string, hourlyWeatherEntityArr []entity.HourlyWeatherEntity) error {
+	return r.Save(key, hourlyWeatherEntityArr)
 }
 
-func (r *RedisHourlyWeatherRepository) Delete(cityName string) error {
-	return r.Delete(cityName)
+func (r *RedisHourlyWeatherRepository) Delete(key string) error {
+	return r.Delete(key)
 }
 
 type RedisDailyWeatherRepository struct {
@@ -120,14 +133,14 @@ func NewRedisDailyWeatherRepository(log *logrus.Logger, client *redis.Client, cf
 	}
 }
 
-func (r *RedisDailyWeatherRepository) Get(cityName string) (*[]entity.DailyWeatherEntity, error) {
-	return r.Get(cityName)
+func (r *RedisDailyWeatherRepository) Get(key string) (*[]entity.DailyWeatherEntity, error) {
+	return r.Get(key)
 }
 
-func (r *RedisDailyWeatherRepository) Save(cityName string, hourlyWeatherEntityArr []entity.DailyWeatherEntity) error {
-	return r.Save(cityName, hourlyWeatherEntityArr)
+func (r *RedisDailyWeatherRepository) Save(key string, hourlyWeatherEntityArr []entity.DailyWeatherEntity) error {
+	return r.Save(key, hourlyWeatherEntityArr)
 }
 
-func (r *RedisDailyWeatherRepository) Delete(cityName string) error {
-	return r.Delete(cityName)
+func (r *RedisDailyWeatherRepository) Delete(key string) error {
+	return r.Delete(key)
 }
