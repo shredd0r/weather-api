@@ -8,6 +8,11 @@ import (
 	"weather-api/util"
 )
 
+type ApiNinjasInterface interface {
+	GetGeocoding(request dto.ApiNinjasGeocodingRequestDto) (*dto.ApiNinjasGeocodingResponseDto, error)
+	GetReversGeocoding(request dto.ApiNinjasReverseGeocodingRequestDto) (*dto.ApiNinjasReverseGeocodingResponseDto, error)
+}
+
 type ApiNinjasClient struct {
 	*Client
 }

@@ -9,6 +9,13 @@ import (
 	"weather-api/dto"
 )
 
+type AccuWeatherInterface interface {
+	GetCurrentWeatherInfo(request dto.AccuWeatherRequestDto) (*dto.AccuWeatherCurrentResponseDto, error)
+	GetHourlyWeatherInfo(request dto.AccuWeatherRequestDto) (*[]dto.AccuWeatherHourlyResponseDto, error)
+	GetDailyWeatherInfo(request dto.AccuWeatherRequestDto) (*dto.AccuWeatherDailyResponseDto, error)
+	GetGeoPositionSearch(request dto.AccuWeatherGeoPositionRequestDto) (*dto.AccuWeatherGeoPositionResponseDto, error)
+}
+
 type AccuWeatherClient struct {
 	*Client
 }

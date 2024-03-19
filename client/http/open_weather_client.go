@@ -9,6 +9,11 @@ import (
 	"weather-api/util"
 )
 
+type OpenWeatherInterface interface {
+	GetCurrentWeatherInfo(request dto.OpenWeatherRequestDto) (*dto.OpenWeatherCurrentWeatherResponseDto, error)
+	GetForecastWeatherInfo(request dto.OpenWeatherForecastRequestDto) (*dto.OpenWeatherHourlyWeatherResponseDto, error)
+}
+
 type OpenWeatherClient struct {
 	*Client
 }

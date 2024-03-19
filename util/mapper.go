@@ -12,10 +12,10 @@ func MapToCurrentWeatherDto(entity *entity.CurrentWeatherEntity) dto.CurrentWeat
 		EpochTime:            entity.EpochTime,
 		Visibility:           entity.Visibility,
 		CurrentTemperature:   entity.CurrentTemperature,
-		MinTemperature:       &entity.MinTemperature,
-		MaxTemperature:       &entity.MaxTemperature,
-		FeelsLikeTemperature: entity.FillLikeTemperature,
-		IconResource:         &entity.IconResource,
+		MinTemperature:       entity.MinTemperature,
+		MaxTemperature:       entity.MaxTemperature,
+		FeelsLikeTemperature: entity.FeelsLikeTemperature,
+		IconResource:         entity.IconResource,
 	}
 }
 
@@ -36,11 +36,20 @@ func Float64ToString(f float64) string {
 	return fmt.Sprintf("%.2f", f)
 }
 
-func RoundFloat64(f float64, precision uint) float64 {
+func RoundFloat64(f *float64, precision uint) *float64 {
+	if f == nil {
+		return nil
+	}
+
 	ratio := math.Pow(10, float64(precision))
-	return math.Round(f*ratio) / ratio
+	volume := math.Round(*f*ratio) / ratio
+	return &volume
 }
 
-func GetIconResourceNameByAccuWeatherIcon(iconId uint8) *string {
+func GetIconResourceNameByAccuWeatherIcon(iconId *uint8) *string {
 	return nil
+}
+
+func GetIconResourceNameByWeatherIcon(weatherIcon uint8) *string {
+	return GetIconResourceNameByAccuWeatherIcon(&weatherIcon)
 }

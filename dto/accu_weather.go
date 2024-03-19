@@ -14,11 +14,11 @@ type AccuWeatherRequestDto struct {
 type AccuWeatherCurrentResponseDto struct {
 	EpochTime           int64
 	WeatherText         string
-	WeatherIcon         uint8
+	WeatherIcon         *uint8
 	PrecipitationType   PrecipitationType
 	Temperature         AccuWeatherIndicationInfoDto
 	RealFeelTemperature AccuWeatherIndicationInfoDto
-	UVIndex             uint8
+	UVIndex             *uint8
 	Visibility          AccuWeatherIndicationInfoDto
 	MobileLink          string
 	Link                string
@@ -26,18 +26,18 @@ type AccuWeatherCurrentResponseDto struct {
 
 type AccuWeatherHourlyResponseDto struct {
 	EpochTime                int64
-	WeatherIcon              uint8
+	WeatherIcon              *uint8
 	IconPhrase               string
 	Temperature              AccuWeatherValueInfoDto
 	RealFeelTemperature      AccuWeatherValueInfoDto
 	Wind                     AccuWeatherWindInfoDto
-	UVIndex                  uint8
+	UVIndex                  *uint8
 	HasPrecipitation         bool
 	PrecipitationType        PrecipitationType
-	PrecipitationProbability int
-	RainProbability          uint
-	SnowProbability          uint
-	IceProbability           uint
+	PrecipitationProbability *int
+	RainProbability          *uint
+	SnowProbability          *uint
+	IceProbability           *uint
 	TotalLiquid              AccuWeatherValueInfoDto
 	Rain                     AccuWeatherValueInfoDto
 	Snow                     AccuWeatherValueInfoDto
@@ -75,14 +75,21 @@ type AccuWeatherHeadlineDto struct {
 }
 
 type AccuWeatherDailyForecastDto struct {
-	Date        string
-	EpochDate   int64
-	Temperature AccuWeatherTemperatureDto
-	Day         AccuWeatherDayInfoDto
-	Night       AccuWeatherDayInfoDto
-	Sources     *[]string
-	MobileLink  string
-	Link        string
+	Date         string
+	EpochDate    int64
+	Temperature  AccuWeatherTemperatureDto
+	Sun          AccuWeatherSunInfoDto
+	AirAndPollen []AccuWeatherCategoryInfoDto
+	Day          AccuWeatherDayInfoDto
+	Night        AccuWeatherDayInfoDto
+	Sources      []string
+	MobileLink   string
+	Link         string
+}
+
+type AccuWeatherSunInfoDto struct {
+	EpochRise int64
+	EpochSet  int64
 }
 
 type AccuWeatherDayInfoDto struct {
@@ -90,7 +97,7 @@ type AccuWeatherDayInfoDto struct {
 	IconPhrase               string
 	HasPrecipitation         bool
 	PrecipitationType        PrecipitationType
-	PrecipitationProbability int
+	PrecipitationProbability *int
 	Wind                     AccuWeatherWindInfoDto
 	TotalLiquid              AccuWeatherValueInfoDto
 	RelativeHumidity         AccuWeatherRelativeHumidity
@@ -107,7 +114,7 @@ type AccuWeatherTemperatureDto struct {
 }
 
 type AccuWeatherValueInfoDto struct {
-	Value    float64
+	Value    *float64
 	Unit     string
 	UnitType int
 }
@@ -122,6 +129,13 @@ type AccuWeatherGeoPositionRequestDto struct {
 	AccuWeatherBaseRequestDto
 	Latitude  float64
 	Longitude float64
+}
+
+type AccuWeatherCategoryInfoDto struct {
+	Name          string
+	Value         *int
+	Category      string
+	CategoryValue int
 }
 
 type AccuWeatherGeoPositionResponseDto struct {

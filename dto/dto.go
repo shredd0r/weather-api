@@ -2,24 +2,24 @@ package dto
 
 type CurrentWeatherDto struct {
 	EpochTime            int64
-	Visibility           float64
-	CurrentTemperature   float64
+	Visibility           *float64
+	CurrentTemperature   *float64
 	MinTemperature       *float64
 	MaxTemperature       *float64
-	FeelsLikeTemperature float64
+	FeelsLikeTemperature *float64
 	IconResource         *string
 	MobileLink           string
 	Link                 string
 }
 
 type HourlyWeatherDto struct {
-	Temperature                float64
-	FeelsLikeTemperature       float64
-	UVIndex                    uint8
+	Temperature                *float64
+	FeelsLikeTemperature       *float64
+	UVIndex                    *uint8
 	EpochTime                  int64
-	ProbabilityOfPrecipitation float64
+	ProbabilityOfPrecipitation *float64
 	PrecipitationType          PrecipitationType
-	AmountOfPrecipitation      float64
+	AmountOfPrecipitation      *float64
 	WindDto                    WindDto
 	IconResource               *string
 	MobileLink                 string
@@ -27,22 +27,23 @@ type HourlyWeatherDto struct {
 }
 
 type DailyWeatherDto struct {
-	MinTemperature float64
-	MaxTemperature float64
-	Humidity       float64
-	IndexUV        float64
-	SunriseTime    int64
-	SunsetTime     int64
-	WindDto        WindDto
-	RainFall       float64
-	DayOfWeek      int
-	IconResource   *string
-	MobileLink     string
-	Link           string
+	EpochTime                  int64
+	MinTemperature             *float64
+	MaxTemperature             *float64
+	Humidity                   float64
+	UVIndex                    *float64
+	SunriseTime                int64
+	SunsetTime                 int64
+	WindDto                    WindDto
+	ProbabilityOfPrecipitation *float64
+	PrecipitationType          PrecipitationType
+	IconResource               *string
+	MobileLink                 string
+	Link                       string
 }
 
 type WindDto struct {
-	Speed   float64
+	Speed   *float64
 	Degrees float64
 }
 

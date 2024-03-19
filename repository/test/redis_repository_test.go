@@ -18,13 +18,13 @@ func TestSaveCurrentWeatherEntity(t *testing.T) {
 	r := initRedisCurrentRepository(t)
 
 	err := r.Save(cityName, entity.CurrentWeatherEntity{
-		EpochTime:           time.Now().UnixMilli(),
-		Visibility:          0.123,
-		CurrentTemperature:  10.24,
-		MinTemperature:      -4.2,
-		MaxTemperature:      25.13,
-		FillLikeTemperature: 4.12,
-		IconResource:        "1",
+		EpochTime:            time.Now().UnixMilli(),
+		Visibility:           0.123,
+		CurrentTemperature:   10.24,
+		MinTemperature:       -4.2,
+		MaxTemperature:       25.13,
+		FeelsLikeTemperature: 4.12,
+		IconResource:         "1",
 	})
 
 	assert.Nil(t, err)
