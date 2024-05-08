@@ -1,31 +1,31 @@
 package redis
 
 import (
-	"context"
-	"github.com/redis/go-redis/v9"
-	"time"
+	"github.com/RediSearch/redisearch-go/redisearch"
 	"weather-api/config"
 )
 
 type Client struct {
-	ctx         *context.Context
-	redisClient *redis.Client
+	rsc *redisearch.Client
 }
 
-func NewClient(ctx *context.Context, cfg config.Redis) *Client {
+func NewClient(cfg config.Redis, indexName string) *Client {
 	return &Client{
-		ctx: ctx,
-		redisClient: redis.NewClient(
-			&redis.Options{
-				Addr: cfg.Address,
-			}),
+		rsc: redisearch.NewClient(
+			cfg.Address,
+			indexName),
 	}
 }
 
-func (c *Client) Set(key string, value string, expiration time.Duration) error {
-	return c.redisClient.Set(*c.ctx, key, value, expiration).Err()
+func (c *Client) Index(docs ...redisearch.Document) error {
+	return c.rsc.Index(docs...)
 }
 
-func (c *Client) Get(key string) (string, error) {
-	return c.redisClient.Get(*c.ctx, key).Result()
+func (c *Client) Search(q *redisearch.Query) ([]redisearch.Document, error) {
+	docs, _, err := c.rsc.Search(q)
+	return docs, err
+}
+
+func (c *Client) Delete(id string) error {
+	return c.rsc.DeleteDocument(id)
 }

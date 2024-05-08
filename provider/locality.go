@@ -61,11 +61,11 @@ func (p *HttpLocalityProvider) GetCityName(latitude float64, longitude float64) 
 
 type CacheLocalityProvider struct {
 	log         *logrus.Logger
-	localityRep repository.Repository[entity.LocalityEntity]
+	localityRep repository.LocalityRepository
 }
 
 func (p *CacheLocalityProvider) GetLocalityDto(cityName string) (*dto.LocalityDto, error) {
-	localityEntity, err := p.localityRep.Get(cityName)
+	localityEntity, err := p.localityRep.FindByCityName(cityName)
 
 	if err == nil {
 		localityDto := util.MapToLocalityDtoBy(localityEntity, cityName)
@@ -76,7 +76,7 @@ func (p *CacheLocalityProvider) GetLocalityDto(cityName string) (*dto.LocalityDt
 }
 
 func (p *CacheLocalityProvider) Save(localityDto dto.LocalityDto) error {
-	err := p.localityRep.Save(localityDto.CityName, entity.LocalityEntity{
+	err := p.localityRep.Save(entity.LocalityEntity{
 		Latitude:               localityDto.Latitude,
 		Longitude:              localityDto.Longitude,
 		AccuWeatherLocationKey: localityDto.AccuWeatherLocationKey,

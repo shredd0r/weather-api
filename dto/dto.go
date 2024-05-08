@@ -20,7 +20,7 @@ type HourlyWeatherDto struct {
 	ProbabilityOfPrecipitation *float64
 	PrecipitationType          PrecipitationType
 	AmountOfPrecipitation      *float64
-	WindDto                    WindDto
+	WindDto                    *WindDto
 	IconResource               *string
 	MobileLink                 string
 	Link                       string
@@ -34,7 +34,7 @@ type DailyWeatherDto struct {
 	UVIndex                    *float64
 	SunriseTime                int64
 	SunsetTime                 int64
-	WindDto                    WindDto
+	WindDto                    *WindDto
 	ProbabilityOfPrecipitation *float64
 	PrecipitationType          PrecipitationType
 	IconResource               *string

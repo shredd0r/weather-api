@@ -32,23 +32,23 @@ func (p *HttpAccuWeatherProvider) CurrentWeatherInfo(weatherRequestDto dto.Weath
 	return &currentWeatherDto, nil
 }
 
-func (p *HttpAccuWeatherProvider) HourlyWeatherInfo(weatherRequestDto dto.WeatherRequestDto) (*[]dto.HourlyWeatherDto, error) {
+func (p *HttpAccuWeatherProvider) HourlyWeatherInfo(weatherRequestDto dto.WeatherRequestDto) ([]*dto.HourlyWeatherDto, error) {
 	resp, err := p.client.GetHourlyWeatherInfo(getRequestBy(weatherRequestDto))
 
 	if err != nil {
 		return nil, err
 	}
 
-	var hourlyDtos = make([]dto.HourlyWeatherDto, len(*resp))
+	var hourlyDtos = make([]*dto.HourlyWeatherDto, len(*resp))
 
 	for _, respDto := range *resp {
 		hourlyDtos = append(hourlyDtos, mapToHourlyWeatherDtoBy(&respDto))
 	}
 
-	return &hourlyDtos, nil
+	return hourlyDtos, nil
 }
 
-func (p *HttpAccuWeatherProvider) DailyWeatherInfo(weatherRequestDto dto.WeatherRequestDto) (*[]dto.DailyWeatherDto, error) {
+func (p *HttpAccuWeatherProvider) DailyWeatherInfo(weatherRequestDto dto.WeatherRequestDto) ([]*dto.DailyWeatherDto, error) {
 	resp, err := p.client.GetDailyWeatherInfo(getRequestBy(weatherRequestDto))
 
 	if err != nil {
@@ -57,7 +57,7 @@ func (p *HttpAccuWeatherProvider) DailyWeatherInfo(weatherRequestDto dto.Weather
 
 	dailyWeatherSlice := mapToDailyWeatherDtoList(resp)
 
-	return &dailyWeatherSlice, nil
+	return dailyWeatherSlice, nil
 }
 
 func getRequestBy(weatherRequestDto dto.WeatherRequestDto) dto.AccuWeatherRequestDto {
@@ -104,7 +104,7 @@ func mapToCurrentWeatherDtoBy(resp *dto.AccuWeatherCurrentResponseDto, unit dto.
 	}
 }
 
-func mapToHourlyWeatherDtoBy(hourlyDto *dto.AccuWeatherHourlyResponseDto) dto.HourlyWeatherDto {
+func mapToHourlyWeatherDtoBy(hourlyDto *dto.AccuWeatherHourlyResponseDto) *dto.HourlyWeatherDto {
 	var precipitationType dto.PrecipitationType = dto.PrecipitationTypeEmpty
 
 	if hourlyDto.HasPrecipitation {
@@ -112,7 +112,7 @@ func mapToHourlyWeatherDtoBy(hourlyDto *dto.AccuWeatherHourlyResponseDto) dto.Ho
 
 	}
 
-	return dto.HourlyWeatherDto{
+	return &dto.HourlyWeatherDto{
 		Temperature:                hourlyDto.Temperature.Value,
 		FeelsLikeTemperature:       hourlyDto.RealFeelTemperature.Value,
 		UVIndex:                    hourlyDto.UVIndex,
@@ -127,11 +127,11 @@ func mapToHourlyWeatherDtoBy(hourlyDto *dto.AccuWeatherHourlyResponseDto) dto.Ho
 	}
 }
 
-func mapToDailyWeatherDtoList(dailyResp *dto.AccuWeatherDailyResponseDto) []dto.DailyWeatherDto {
-	var dailySlice []dto.DailyWeatherDto
+func mapToDailyWeatherDtoList(dailyResp *dto.AccuWeatherDailyResponseDto) []*dto.DailyWeatherDto {
+	dailySlice := make([]*dto.DailyWeatherDto, len(dailyResp.DailyForecasts))
 
-	for _, dailyForecast := range dailyResp.DailyForecasts {
-		dailyWeather := dto.DailyWeatherDto{
+	for i, dailyForecast := range dailyResp.DailyForecasts {
+		dailyWeather := &dto.DailyWeatherDto{
 			EpochTime:                  dailyForecast.EpochDate,
 			MinTemperature:             dailyForecast.Temperature.Minimum.Value,
 			MaxTemperature:             dailyForecast.Temperature.Maximum.Value,
@@ -147,7 +147,7 @@ func mapToDailyWeatherDtoList(dailyResp *dto.AccuWeatherDailyResponseDto) []dto.
 			WindDto:                    mapWindDto(dailyForecast.Day.Wind),
 		}
 
-		dailySlice = append(dailySlice, dailyWeather)
+		dailySlice[i] = dailyWeather
 	}
 
 	return dailySlice
