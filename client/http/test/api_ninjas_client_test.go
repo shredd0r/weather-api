@@ -6,7 +6,7 @@ import (
 	"weather-api/client/http"
 	"weather-api/config"
 	"weather-api/dto"
-	"weather-api/logger"
+	"weather-api/log"
 )
 
 func TestApiNinjasGetGeocodingInfo(t *testing.T) {
@@ -42,13 +42,13 @@ func getApiNinjasGetReverseGeocodingRequest() dto.ApiNinjasReverseGeocodingReque
 
 func initApiNinjasTest(t *testing.T) *http.ApiNinjasClient {
 	cfg := config.ParseEnv()
-	if cfg.ApiNinjasApiKey == "" {
+	if cfg.ApiKeys.ApiNinjasApiKey == "" {
 		t.Skip("skip test because api key not set")
 	}
-	log := logger.NewLogger(cfg.Logger)
+	log := log.NewLogger(cfg.Logger)
 
 	return http.NewApiNinjasClient(
 		log,
 		http.NewHttpClient(log),
-		cfg.ApiNinjasApiKey)
+		cfg.ApiKeys.ApiNinjasApiKey)
 }

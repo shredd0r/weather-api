@@ -1,6 +1,6 @@
 package dto
 
-type CurrentWeatherDto struct {
+type CurrentWeather struct {
 	EpochTime            int64
 	Visibility           *float64
 	CurrentTemperature   *float64
@@ -12,7 +12,7 @@ type CurrentWeatherDto struct {
 	Link                 string
 }
 
-type HourlyWeatherDto struct {
+type HourlyWeather struct {
 	Temperature                *float64
 	FeelsLikeTemperature       *float64
 	UVIndex                    *uint8
@@ -20,13 +20,13 @@ type HourlyWeatherDto struct {
 	ProbabilityOfPrecipitation *float64
 	PrecipitationType          PrecipitationType
 	AmountOfPrecipitation      *float64
-	WindDto                    *WindDto
+	WindDto                    *Wind
 	IconResource               *string
 	MobileLink                 string
 	Link                       string
 }
 
-type DailyWeatherDto struct {
+type DailyWeather struct {
 	EpochTime                  int64
 	MinTemperature             *float64
 	MaxTemperature             *float64
@@ -34,7 +34,7 @@ type DailyWeatherDto struct {
 	UVIndex                    *float64
 	SunriseTime                int64
 	SunsetTime                 int64
-	WindDto                    *WindDto
+	WindDto                    *Wind
 	ProbabilityOfPrecipitation *float64
 	PrecipitationType          PrecipitationType
 	IconResource               *string
@@ -42,20 +42,35 @@ type DailyWeatherDto struct {
 	Link                       string
 }
 
-type WindDto struct {
+type Wind struct {
 	Speed   *float64
 	Degrees float64
 }
 
-type LocalityDto struct {
-	Latitude               float64
-	Longitude              float64
-	CityName               string
+type Coords struct {
+	Latitude  float64
+	Longitude float64
+}
+
+type Location struct {
+	Coords                 Coords
+	AccuWeatherLocationKey string
+}
+
+type LocationInfo struct {
+	Coords                 Coords
+	AddressHash            string
 	AccuWeatherLocationKey string
 }
 
 type WeatherRequestDto struct {
-	LocalityDto
+	Coords *Coords
+	Language
+	Unit
+}
+
+type WeatherRequestProviderDto struct {
+	Location LocationInfo
 	Language
 	Unit
 }

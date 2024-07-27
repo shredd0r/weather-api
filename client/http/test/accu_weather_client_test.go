@@ -6,7 +6,7 @@ import (
 	"weather-api/client/http"
 	"weather-api/config"
 	"weather-api/dto"
-	"weather-api/logger"
+	"weather-api/log"
 )
 
 func TestAccuCurrentWeatherInfo(t *testing.T) {
@@ -67,13 +67,13 @@ func getAccuWeatherBaseRequestDto() dto.AccuWeatherBaseRequestDto {
 
 func initAccuWeatherTest(t *testing.T) *http.AccuWeatherClient {
 	cfg := config.ParseEnv()
-	if cfg.AccuWeatherApiKey == "" {
+	if cfg.ApiKeys.AccuWeatherApiKey == "" {
 		t.Skip("skip test because api key not set")
 	}
-	log := logger.NewLogger(cfg.Logger)
+	log := log.NewLogger(cfg.Logger)
 
 	return http.NewAccuWeatherClient(
 		log,
 		http.NewHttpClient(log),
-		cfg.AccuWeatherApiKey)
+		cfg.ApiKeys.AccuWeatherApiKey)
 }

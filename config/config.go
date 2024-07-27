@@ -10,10 +10,7 @@ type Config struct {
 	Logger             Logger             `envPrefix:"LOG_"`
 	Redis              Redis              `envPrefix:"REDIS_"`
 	ExpirationDuration ExpirationDuration `envPrefix:"EXPIRATION_"`
-	AccuWeatherApiKey  string             `env:"ACCU_WEATHER_API_KEY"`
-	OpenWeatherApiKey  string             `env:"OPEN_WEATHER_API_KEY"`
-	WeatherApiApiKey   string             `env:"WEATHER_API_API_KEY"`
-	ApiNinjasApiKey    string             `env:"API_NINJAS_API_KEY"`
+	ApiKeys            ApiKeys            `envPrefix:"API_KEY_"`
 }
 
 type Redis struct {
@@ -26,6 +23,13 @@ type Logger struct {
 
 type ExpirationDuration struct {
 	WeatherInfo time.Duration `env:"WEATHER_INFO" envDefault:"3h"`
+}
+
+type ApiKeys struct {
+	AccuWeatherApiKey string `env:"ACCU_WEATHER"`
+	OpenWeatherApiKey string `env:"OPEN_WEATHER"`
+	WeatherApiApiKey  string `env:"WEATHER_API"`
+	ApiNinjasApiKey   string `env:"API_NINJAS"`
 }
 
 func ParseEnv() *Config {
