@@ -35,9 +35,9 @@ type AccuWeatherHourlyResponseDto struct {
 	HasPrecipitation         bool
 	PrecipitationType        PrecipitationType
 	PrecipitationProbability *int
-	RainProbability          *uint
-	SnowProbability          *uint
-	IceProbability           *uint
+	RainProbability          *int
+	SnowProbability          *int
+	IceProbability           *int
 	TotalLiquid              AccuWeatherValueInfoDto
 	Rain                     AccuWeatherValueInfoDto
 	Snow                     AccuWeatherValueInfoDto

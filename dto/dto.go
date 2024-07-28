@@ -1,5 +1,9 @@
 package dto
 
+type Error struct {
+	Message string
+}
+
 type CurrentWeather struct {
 	EpochTime            int64
 	Visibility           *float64
@@ -20,7 +24,7 @@ type HourlyWeather struct {
 	ProbabilityOfPrecipitation *float64
 	PrecipitationType          PrecipitationType
 	AmountOfPrecipitation      *float64
-	WindDto                    *Wind
+	Wind                       *Wind
 	IconResource               *string
 	MobileLink                 string
 	Link                       string
@@ -34,7 +38,7 @@ type DailyWeather struct {
 	UVIndex                    *float64
 	SunriseTime                int64
 	SunsetTime                 int64
-	WindDto                    *Wind
+	Wind                       *Wind
 	ProbabilityOfPrecipitation *float64
 	PrecipitationType          PrecipitationType
 	IconResource               *string
@@ -65,13 +69,13 @@ type LocationInfo struct {
 
 type WeatherRequestDto struct {
 	Coords *Coords
-	Language
+	Locale string
 	Unit
 }
 
 type WeatherRequestProviderDto struct {
 	Location LocationInfo
-	Language
+	Locale   string
 	Unit
 }
 
@@ -82,14 +86,6 @@ const (
 	WeatherForecasterAccuWeather = "AccuWeather"
 	WeatherForecasterOpenWeather = "OpenWeather"
 	WeatherForecasterWeatherApi  = "WeatherApi"
-)
-
-type Language string
-
-const (
-	LanguageUnspecified = ""
-	LanguageEnglish     = "en"
-	LanguageUkrainian   = "uk"
 )
 
 type Unit string

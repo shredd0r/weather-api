@@ -1,10 +1,19 @@
 package dto
 
+type OpenWeatherUnits string
+
+const (
+	OpenWeatherUnitsUndefined = "undefined"
+	OpenWeatherUnitsMetric    = "metric"
+	OpenWeatherUnitsImperial  = "imperial"
+	OpenWeatherUnitsStandard  = "standard"
+)
+
 type OpenWeatherRequestDto struct {
-	Latitude  float64 `json:"lat"`
-	Longitude float64 `json:"lon"`
-	Units     string
-	Language  string `json:"lang"`
+	Latitude  float64          `json:"lat"`
+	Longitude float64          `json:"lon"`
+	Units     OpenWeatherUnits `json:"units"`
+	Language  string           `json:"lang"`
 }
 
 type OpenWeatherForecastRequestDto struct {

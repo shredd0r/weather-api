@@ -9,7 +9,11 @@ import (
 )
 
 var (
-	StatusCodeNot200 = errors.New("api returned code != 200 OK")
+	ErrInvalidLocale     = errors.New("invalid locale")
+	ErrInvalidMetric     = errors.New("invalid metric")
+	ErrInvalidCoords     = errors.New("invalid coords")
+	ErrCountRequestIsOut = errors.New("count of request to api out")
+	ErrStatusCodeNot200  = errors.New("api returned code != 200 OK")
 )
 
 type Client struct {
@@ -60,7 +64,7 @@ func HttpGetAndGetResponse[T any](httpClient *http.Client, log *logrus.Logger, r
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, StatusCodeNot200
+		return nil, ErrStatusCodeNot200
 	}
 
 	responseBody := ResponseBodyDecoder[T](response.Body)

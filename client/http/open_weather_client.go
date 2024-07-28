@@ -32,7 +32,6 @@ func (c *OpenWeatherClient) GetCurrentWeatherInfo(request dto.OpenWeatherRequest
 func (c *OpenWeatherClient) GetForecastWeatherInfo(request dto.OpenWeatherForecastRequestDto) (*dto.OpenWeatherHourlyWeatherResponseDto, error) {
 	urlForRequest := c.BaseURL + "data/2.5/forecast?" + c.getQueryParamsForForecast(request)
 	return HttpGetAndGetResponse[dto.OpenWeatherHourlyWeatherResponseDto](c.httpClient, c.log, GetHttpRequestBy(urlForRequest))
-
 }
 
 func (c *OpenWeatherClient) getQueryParamByRequest(request dto.OpenWeatherRequestDto) url.Values {
@@ -40,7 +39,7 @@ func (c *OpenWeatherClient) getQueryParamByRequest(request dto.OpenWeatherReques
 		"appid": {c.apiKey},
 		"lat":   {util.Float64ToString(request.Latitude)},
 		"lon":   {util.Float64ToString(request.Longitude)},
-		"units": {request.Units},
+		"units": {string(request.Units)},
 		"lang":  {request.Language},
 	}
 

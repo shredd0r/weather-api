@@ -24,12 +24,13 @@ func main() {
 	ls := service.NewLocationService(logger, rls, ac, anc)
 	as := service.NewWeatherService(logger, dto.WeatherForecasterAccuWeather, ls, ap, rws)
 
-	resp, err := as.CurrentWeather(context.Background(), dto.WeatherRequestDto{
+	resp, err := as.DailyWeather(context.Background(), dto.WeatherRequestDto{
 		Coords: &dto.Coords{
 			Latitude:  50.000691,
 			Longitude: 36.215194,
 		},
-		Unit: dto.UnitMetric,
+		Locale: "uk-ua",
+		Unit:   dto.UnitMetric,
 	})
 
 	logger.Error(err)
