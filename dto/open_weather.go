@@ -71,7 +71,7 @@ type OpenWeatherCoordinationDto struct {
 
 type OpenWeatherForecastInfoDto struct {
 	Visibility                 int
-	DateTimeForecast           int                              `json:"dt"`
+	DateTimeForecast           int64                            `json:"dt"`
 	MainInfo                   OpenWeatherMainInfoDto           `json:"main"`
 	WeatherInfos               *[]OpenWeatherWeatherInfoDto     `json:"weather"`
 	CloudInfo                  OpenWeatherCloudInfoDto          `json:"clouds"`
