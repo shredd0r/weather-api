@@ -2,13 +2,13 @@ package http
 
 import (
 	"bytes"
-	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"weather-api/log"
 )
 
 type LoggingTransport struct {
-	log       *logrus.Logger
+	log       log.Logger
 	Transport http.RoundTripper
 }
 

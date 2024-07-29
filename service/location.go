@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"weather-api/client/http"
 	"weather-api/dto"
+	"weather-api/log"
 	"weather-api/provider"
 	"weather-api/storage"
 )
@@ -17,7 +17,7 @@ type LocationServiceImpl struct {
 	locationProvider provider.LocationProvider
 }
 
-func NewLocationService(logger *logrus.Logger, locationStorage storage.LocationStorage,
+func NewLocationService(logger log.Logger, locationStorage storage.LocationStorage,
 	accuWeatherClient http.AccuWeatherInterface, apiNinjasClient http.ApiNinjasInterface) LocationService {
 	return &LocationServiceImpl{
 		locationProvider: provider.NewLocationProvider(logger, locationStorage, accuWeatherClient, apiNinjasClient),

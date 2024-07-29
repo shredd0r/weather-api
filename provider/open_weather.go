@@ -2,20 +2,27 @@ package provider
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"weather-api/client/http"
 	"weather-api/dto"
+	"weather-api/log"
 	"weather-api/util"
 )
 
 const dayInResponse = 5
 
 type OpenWeatherProvider struct {
-	logger *logrus.Logger
+	logger log.Logger
 	client http.OpenWeatherInterface
 }
 
-func (p OpenWeatherProvider) CurrentWeather(ctx context.Context, request dto.WeatherRequestProviderDto) (*dto.CurrentWeather, error) {
+func NewOpenWeatherProvider(logger log.Logger, client http.OpenWeatherInterface) WeatherProvider {
+	return &OpenWeatherProvider{
+		logger: logger,
+		client: client,
+	}
+}
+
+func (p OpenWeatherProvider) CurrentWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*dto.CurrentWeather, error) {
 	resp, err := p.client.GetCurrentWeatherInfo(p.getRequest(request))
 
 	if err != nil {
@@ -33,7 +40,7 @@ func (p OpenWeatherProvider) CurrentWeather(ctx context.Context, request dto.Wea
 	}, nil
 }
 
-func (p OpenWeatherProvider) HourlyWeather(ctx context.Context, request dto.WeatherRequestProviderDto) (*[]*dto.HourlyWeather, error) {
+func (p OpenWeatherProvider) HourlyWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*[]*dto.HourlyWeather, error) {
 	resp, err := p.client.GetForecastWeatherInfo(p.getForecastRequest(request))
 
 	if err != nil {
@@ -43,7 +50,7 @@ func (p OpenWeatherProvider) HourlyWeather(ctx context.Context, request dto.Weat
 	return p.mapToHourlyWeathers(resp), nil
 }
 
-func (p OpenWeatherProvider) DailyWeather(ctx context.Context, request dto.WeatherRequestProviderDto) (*[]*dto.DailyWeather, error) {
+func (p OpenWeatherProvider) DailyWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*[]*dto.DailyWeather, error) {
 	resp, err := p.client.GetForecastWeatherInfo(p.getForecastRequest(request))
 
 	if err != nil {
@@ -160,13 +167,13 @@ func (p OpenWeatherProvider) getAmountOfPrecipitation(precipitationType dto.Prec
 	}
 }
 
-func (p OpenWeatherProvider) getForecastRequest(request dto.WeatherRequestProviderDto) dto.OpenWeatherForecastRequestDto {
+func (p OpenWeatherProvider) getForecastRequest(request *dto.WeatherRequestProviderDto) dto.OpenWeatherForecastRequestDto {
 	return dto.OpenWeatherForecastRequestDto{
 		OpenWeatherRequestDto: p.getRequest(request),
 	}
 }
 
-func (p OpenWeatherProvider) getRequest(request dto.WeatherRequestProviderDto) dto.OpenWeatherRequestDto {
+func (p OpenWeatherProvider) getRequest(request *dto.WeatherRequestProviderDto) dto.OpenWeatherRequestDto {
 	return dto.OpenWeatherRequestDto{
 		Latitude:  request.Location.Coords.Latitude,
 		Longitude: request.Location.Coords.Longitude,

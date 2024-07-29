@@ -95,3 +95,12 @@ const (
 	UnitImperial    = "imperial"
 	UnitMetric      = "metric"
 )
+
+type PrecipitationType string
+
+const (
+	PrecipitationTypeEmpty = ""
+	PrecipitationTypeRain  = "Rain"
+	PrecipitationTypeSnow  = "Snow"
+	PrecipitationTypeIce   = "Ice"
+)

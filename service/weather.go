@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/sirupsen/logrus"
 	"weather-api/dto"
+	"weather-api/log"
 	"weather-api/provider"
 	"weather-api/storage"
 )
@@ -17,13 +17,13 @@ type WeatherService interface {
 
 type WeatherServiceImpl struct {
 	forecaster      dto.WeatherForecaster
-	logger          *logrus.Logger
+	logger          log.Logger
 	locationService LocationService
 	weatherProvider provider.WeatherProvider
 	weatherStorage  storage.WeatherStorage
 }
 
-func NewWeatherService(logger *logrus.Logger, forecaster dto.WeatherForecaster, locationService LocationService,
+func NewWeatherService(logger log.Logger, forecaster dto.WeatherForecaster, locationService LocationService,
 	weatherProvider provider.WeatherProvider, weatherStorage storage.WeatherStorage) WeatherService {
 	return &WeatherServiceImpl{
 		logger:          logger,
@@ -83,7 +83,7 @@ func (s *WeatherServiceImpl) getWeatherRequestProviderDto(ctx context.Context, r
 }
 
 func workflowGetWeatherFromProviderOrStorage[T any](
-	logger *logrus.Logger, ctx context.Context, request dto.WeatherRequestDto, forecaster dto.WeatherForecaster,
+	logger log.Logger, ctx context.Context, request dto.WeatherRequestDto, forecaster dto.WeatherForecaster,
 	methodForGetWeatherProviderRequest func(ctx context.Context, request dto.WeatherRequestDto) (*dto.WeatherRequestProviderDto, error),
 	methodForGetFromStorage func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster) (*T, error),
 	methodForGetFromProvider func(ctx context.Context, request *dto.WeatherRequestProviderDto) (*T, error),

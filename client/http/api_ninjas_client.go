@@ -1,11 +1,15 @@
 package http
 
 import (
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"weather-api/dto"
+	"weather-api/log"
 	"weather-api/util"
+)
+
+var (
+	errMissingAPIKey = "Missing API Key."
 )
 
 type ApiNinjasInterface interface {
@@ -19,7 +23,7 @@ type ApiNinjasClient struct {
 
 var headerKey = "X-Api-Key"
 
-func NewApiNinjasClient(log *logrus.Logger, httpClient *http.Client, apiKey string) *ApiNinjasClient {
+func NewApiNinjasClient(log log.Logger, httpClient *http.Client, apiKey string) *ApiNinjasClient {
 	return &ApiNinjasClient{
 		NewClient("https://api.api-ninjas.com/", log, httpClient, apiKey),
 	}
@@ -30,7 +34,11 @@ func (c *ApiNinjasClient) GetGeocoding(request dto.ApiNinjasGeocodingRequestDto)
 	req := GetHttpRequestBy(urlForRequest)
 	req.Header.Set(headerKey, c.client.apiKey)
 
-	response, err := HttpGetAndGetResponse[[]*dto.ApiNinjasGeocodingResponseDto](c.client.httpClient, c.client.log, req)
+	response, err := HttpGetAndGetResponse[[]*dto.ApiNinjasGeocodingResponseDto](
+		c.client.httpClient,
+		c.client.Log,
+		req,
+		c.parseErrorInResponse)
 
 	return response, err
 }
@@ -40,7 +48,11 @@ func (c *ApiNinjasClient) GetReversGeocoding(request dto.ApiNinjasReverseGeocodi
 	req := GetHttpRequestBy(urlForRequest)
 	req.Header.Set(headerKey, c.client.apiKey)
 
-	response, err := HttpGetAndGetResponse[[]*dto.ApiNinjasReverseGeocodingResponseDto](c.client.httpClient, c.client.log, req)
+	response, err := HttpGetAndGetResponse[[]*dto.ApiNinjasReverseGeocodingResponseDto](
+		c.client.httpClient,
+		c.client.Log,
+		req,
+		c.parseErrorInResponse)
 
 	return response, err
 
@@ -59,4 +71,14 @@ func (c *ApiNinjasClient) getQueryParamsForReverse(request dto.ApiNinjasReverseG
 		"lat": {util.Float64ToString(request.Latitude)},
 		"lon": {util.Float64ToString(request.Longitude)},
 	}.Encode()
+}
+
+func (c *ApiNinjasClient) parseErrorInResponse(resp *http.Response) error {
+	_, err := ResponseBodyDecoder[dto.ApiNinjasError](resp.Body)
+
+	if err != nil {
+		return ErrCountRequestIsOut
+	}
+
+	return nil
 }

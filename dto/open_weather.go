@@ -118,3 +118,8 @@ type OpenWeatherSystemInfoDto struct {
 	Sunrise int
 	Sunset  int
 }
+
+type OpenWeatherError struct {
+	Cod     int
+	Message string
+}

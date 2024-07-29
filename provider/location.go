@@ -5,22 +5,22 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"github.com/sirupsen/logrus"
 	"hash"
 	"weather-api/client/http"
 	"weather-api/dto"
+	"weather-api/log"
 	"weather-api/storage"
 )
 
 type LocationProviderImpl struct {
 	hasher            hash.Hash
-	logger            *logrus.Logger
+	logger            log.Logger
 	locationStorage   storage.LocationStorage
 	accuWeatherClient http.AccuWeatherInterface
 	apiNinjaClient    http.ApiNinjasInterface
 }
 
-func NewLocationProvider(logger *logrus.Logger, locationStorage storage.LocationStorage,
+func NewLocationProvider(logger log.Logger, locationStorage storage.LocationStorage,
 	accuWeatherClient http.AccuWeatherInterface, apiNinjasClient http.ApiNinjasInterface) LocationProvider {
 	return &LocationProviderImpl{
 		hasher:            md5.New(),
@@ -47,11 +47,15 @@ func (p *LocationProviderImpl) GetAddressHashByCoords(ctx context.Context, coord
 }
 
 func (p *LocationProviderImpl) LocationByAddressHash(ctx context.Context, coords *dto.Coords, addressHash string) (*dto.Location, error) {
+	p.logger.Info("start get location by address hash")
+
 	location, err := p.locationStorage.GetLocation(ctx, addressHash)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
+			p.logger.Info("in storage not found location by address hash")
 			locationKey, err := p.getLocationKeyFromAccuWeather(coords)
 			if err != nil {
+				p.logger.Error("error when try get location key from accu weather")
 				return nil, err
 			}
 			location = &dto.Location{
@@ -65,6 +69,7 @@ func (p *LocationProviderImpl) LocationByAddressHash(ctx context.Context, coords
 }
 
 func (p *LocationProviderImpl) getAddressHashByCoordsFromNinjaApi(coords *dto.Coords) (string, error) {
+	p.logger.Info("start get country by coords from ninja api")
 	r, err := p.apiNinjaClient.GetReversGeocoding(dto.ApiNinjasReverseGeocodingRequestDto{
 		Latitude:  coords.Latitude,
 		Longitude: coords.Longitude,
@@ -83,6 +88,8 @@ func (p *LocationProviderImpl) getAddressHashByCoordsFromNinjaApi(coords *dto.Co
 }
 
 func (p *LocationProviderImpl) storeAddressHash(ctx context.Context, coords *dto.Coords, addressHash string) {
+	p.logger.Info("start store address hash to location storage")
+
 	go func() {
 		err := p.locationStorage.AddNewCoords(ctx, coords, addressHash)
 		if err != nil {
@@ -113,6 +120,8 @@ func (p *LocationProviderImpl) getLocationKeyFromAccuWeather(coords *dto.Coords)
 }
 
 func (p *LocationProviderImpl) storeNewLocation(ctx context.Context, location *dto.Location) {
+	p.logger.Info("start store new location")
+
 	go func() {
 		err := p.locationStorage.SaveLocation(ctx, location)
 		if err != nil {

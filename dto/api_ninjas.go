@@ -24,3 +24,7 @@ type ApiNinjasReverseGeocodingResponseDto struct {
 	Name    string
 	State   string
 }
+
+type ApiNinjasError struct {
+	Error string `json:"error"`
+}

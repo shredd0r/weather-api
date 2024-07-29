@@ -143,11 +143,8 @@ type AccuWeatherGeoPositionResponseDto struct {
 	Key     string
 }
 
-type PrecipitationType string
-
-const (
-	PrecipitationTypeEmpty = ""
-	PrecipitationTypeRain  = "Rain"
-	PrecipitationTypeSnow  = "Snow"
-	PrecipitationTypeIce   = "Ice"
-)
+type AccuWeatherError struct {
+	Code      string
+	Message   string
+	Reference string
+}

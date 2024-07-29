@@ -3,19 +3,19 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"time"
 	"weather-api/client/http"
 	"weather-api/dto"
+	"weather-api/log"
 	"weather-api/util"
 )
 
 type AccuWeatherProvider struct {
-	logger *logrus.Logger
+	logger log.Logger
 	client http.AccuWeatherInterface
 }
 
-func NewAccuWeatherProvider(logger *logrus.Logger, client http.AccuWeatherInterface) WeatherProvider {
+func NewAccuWeatherProvider(logger log.Logger, client http.AccuWeatherInterface) WeatherProvider {
 	return &AccuWeatherProvider{
 		logger: logger,
 		client: client,

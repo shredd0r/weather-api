@@ -2,11 +2,15 @@ package http
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"strconv"
 	"weather-api/dto"
+	"weather-api/log"
+)
+
+var (
+	errMessageAuthorizationFailed = "Api Authorization failed"
 )
 
 type AccuWeatherInterface interface {
@@ -20,7 +24,7 @@ type AccuWeatherClient struct {
 	client *Client
 }
 
-func NewAccuWeatherClient(log *logrus.Logger, httpClient *http.Client, apiKey string) *AccuWeatherClient {
+func NewAccuWeatherClient(log log.Logger, httpClient *http.Client, apiKey string) *AccuWeatherClient {
 	return &AccuWeatherClient{
 		NewClient("http://dataservice.accuweather.com/", log, httpClient, apiKey),
 	}
@@ -28,29 +32,61 @@ func NewAccuWeatherClient(log *logrus.Logger, httpClient *http.Client, apiKey st
 
 func (c *AccuWeatherClient) GetCurrentWeatherInfo(request dto.AccuWeatherRequestDto) (*dto.AccuWeatherCurrentResponseDto, error) {
 	var urlForRequest = c.client.BaseURL + fmt.Sprintf("currentconditions/v1/%s?", request.LocationKey) + c.getQueryParamsForRequest(request)
-	response, err := HttpGetAndGetResponse[[]*dto.AccuWeatherCurrentResponseDto](c.client.httpClient, c.client.log, GetHttpRequestBy(urlForRequest))
+	response, err := HttpGetAndGetResponse[[]*dto.AccuWeatherCurrentResponseDto](
+		c.client.httpClient,
+		c.client.Log,
+		GetHttpRequestBy(urlForRequest),
+		c.parseErrorInResponse)
 
 	if err == nil {
 		return (*response)[0], err
 	}
+
+	c.client.Log.Error("error when get current weather info")
 
 	return nil, err
 }
 
 func (c *AccuWeatherClient) GetHourlyWeatherInfo(request dto.AccuWeatherRequestDto) (*[]*dto.AccuWeatherHourlyResponseDto, error) {
 	var urlForRequest = c.client.BaseURL + fmt.Sprintf("forecasts/v1/hourly/12hour/%s?", request.LocationKey) + c.getQueryParamsForRequest(request)
-	return HttpGetAndGetResponse[[]*dto.AccuWeatherHourlyResponseDto](c.client.httpClient, c.client.log, GetHttpRequestBy(urlForRequest))
+	resp, err := HttpGetAndGetResponse[[]*dto.AccuWeatherHourlyResponseDto](
+		c.client.httpClient,
+		c.client.Log,
+		GetHttpRequestBy(urlForRequest),
+		c.parseErrorInResponse)
+
+	if err != nil {
+		c.client.Log.Error("error when get hourly weather info")
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 func (c *AccuWeatherClient) GetDailyWeatherInfo(request dto.AccuWeatherRequestDto) (*dto.AccuWeatherDailyResponseDto, error) {
 	var urlForRequest = c.client.BaseURL + fmt.Sprintf("forecasts/v1/daily/5day/%s?", request.LocationKey) + c.getQueryParamsForRequest(request)
-	return HttpGetAndGetResponse[dto.AccuWeatherDailyResponseDto](c.client.httpClient, c.client.log, GetHttpRequestBy(urlForRequest))
+	resp, err := HttpGetAndGetResponse[dto.AccuWeatherDailyResponseDto](
+		c.client.httpClient,
+		c.client.Log,
+		GetHttpRequestBy(urlForRequest),
+		c.parseErrorInResponse)
+
+	if err != nil {
+		c.client.Log.Error("error when get daily weather info")
+		return nil, err
+	}
+
+	return resp, nil
 
 }
 
 func (c *AccuWeatherClient) GetGeoPositionSearch(request dto.AccuWeatherGeoPositionRequestDto) (*dto.AccuWeatherGeoPositionResponseDto, error) {
 	var urlForRequest = c.client.BaseURL + "locations/v1/cities/geoposition/search?" + c.getQueryParamsForGeoPosition(request)
-	return HttpGetAndGetResponse[dto.AccuWeatherGeoPositionResponseDto](c.client.httpClient, c.client.log, GetHttpRequestBy(urlForRequest))
+	return HttpGetAndGetResponse[dto.AccuWeatherGeoPositionResponseDto](
+		c.client.httpClient,
+		c.client.Log,
+		GetHttpRequestBy(urlForRequest),
+		c.parseErrorInResponse)
 }
 
 func (c *AccuWeatherClient) getQueryParamsForBase(request dto.AccuWeatherBaseRequestDto) url.Values {
@@ -78,4 +114,21 @@ func (c *AccuWeatherClient) getQueryParamsForGeoPosition(request dto.AccuWeather
 	}
 
 	return queryParams.Encode()
+}
+
+func (c *AccuWeatherClient) parseErrorInResponse(resp *http.Response) error {
+	accuWeatherError, err := ResponseBodyDecoder[dto.AccuWeatherError](resp.Body)
+
+	if err != nil {
+		return err
+	}
+
+	switch accuWeatherError.Message {
+	case errMessageAuthorizationFailed:
+		{
+			return ErrCountRequestIsOut
+		}
+	}
+
+	return nil
 }

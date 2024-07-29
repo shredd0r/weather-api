@@ -6,7 +6,9 @@ import (
 	"weather-api/config"
 )
 
-func NewLogger(cfg config.Logger) *logrus.Logger {
+var std = logrus.New()
+
+func NewLogger(cfg config.Logger) Logger {
 	log := logrus.StandardLogger()
 	level, err := logrus.ParseLevel(cfg.Level)
 
@@ -18,6 +20,13 @@ func NewLogger(cfg config.Logger) *logrus.Logger {
 	return log
 }
 
-func StandardLogger() *logrus.Logger {
-	return logrus.StandardLogger()
+func init() {
+	std.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp:   true,
+		TimestampFormat: "2006-01-02 15:04:05",
+	})
+}
+
+type Logger interface {
+	logrus.FieldLogger
 }

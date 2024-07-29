@@ -3,9 +3,9 @@ package http
 import (
 	"encoding/json"
 	"errors"
-	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"weather-api/log"
 )
 
 var (
@@ -13,17 +13,16 @@ var (
 	ErrInvalidMetric     = errors.New("invalid metric")
 	ErrInvalidCoords     = errors.New("invalid coords")
 	ErrCountRequestIsOut = errors.New("count of request to api out")
-	ErrStatusCodeNot200  = errors.New("api returned code != 200 OK")
 )
 
 type Client struct {
 	BaseURL    string
 	apiKey     string
-	log        *logrus.Logger
+	Log        log.Logger
 	httpClient *http.Client
 }
 
-func NewHttpClient(log *logrus.Logger) *http.Client {
+func NewHttpClient(log log.Logger) *http.Client {
 	return &http.Client{
 		Transport: &LoggingTransport{
 			log:       log,
@@ -32,28 +31,27 @@ func NewHttpClient(log *logrus.Logger) *http.Client {
 	}
 }
 
-func NewClient(baseUrlString string, log *logrus.Logger, httpClient *http.Client, apiKey string) *Client {
+func NewClient(baseUrlString string, log log.Logger, httpClient *http.Client, apiKey string) *Client {
 	return &Client{
 		BaseURL:    baseUrlString,
 		apiKey:     apiKey,
-		log:        log,
+		Log:        log,
 		httpClient: httpClient,
 	}
 }
 
-func ResponseBodyDecoder[T any](r io.ReadCloser) T {
-	defer r.Close()
+func ResponseBodyDecoder[T any](r io.ReadCloser) (*T, error) {
 	var responseBody T
 
 	decoder := json.NewDecoder(r)
 	if err := decoder.Decode(&responseBody); err != nil {
-		panic("Error when decoding response body")
+		return nil, err
 	}
 
-	return responseBody
+	return &responseBody, nil
 }
 
-func HttpGetAndGetResponse[T any](httpClient *http.Client, log *logrus.Logger, request *http.Request) (*T, error) {
+func HttpGetAndGetResponse[T any](httpClient *http.Client, log log.Logger, request *http.Request, parserError func(resp *http.Response) error) (*T, error) {
 	response, err := httpClient.Do(request)
 
 	defer response.Body.Close()
@@ -64,11 +62,11 @@ func HttpGetAndGetResponse[T any](httpClient *http.Client, log *logrus.Logger, r
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, ErrStatusCodeNot200
+		err = parserError(response)
+		return nil, err
 	}
 
-	responseBody := ResponseBodyDecoder[T](response.Body)
-	return &responseBody, nil
+	return ResponseBodyDecoder[T](response.Body)
 }
 
 func GetHttpRequestBy(urlForRequest string) *http.Request {

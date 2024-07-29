@@ -14,17 +14,17 @@ import (
 func main() {
 	cfg := config.ParseEnv()
 	logger := log.NewLogger(cfg.Logger)
-
 	hc := http.NewHttpClient(logger)
 	ac := http.NewAccuWeatherClient(logger, hc, cfg.ApiKeys.AccuWeatherApiKey)
-	ap := provider.NewAccuWeatherProvider(logger, ac)
+	oc := http.NewOpenWeatherClient(logger, hc, cfg.ApiKeys.OpenWeatherApiKey)
+	ap := provider.NewOpenWeatherProvider(logger, oc)
 	rws := &storage.RedisWeatherStorage{}
 	rls := &storage.RedisLocationStorage{}
 	anc := http.NewApiNinjasClient(logger, hc, cfg.ApiKeys.ApiNinjasApiKey)
 	ls := service.NewLocationService(logger, rls, ac, anc)
 	as := service.NewWeatherService(logger, dto.WeatherForecasterAccuWeather, ls, ap, rws)
 
-	resp, err := as.DailyWeather(context.Background(), dto.WeatherRequestDto{
+	resp, err := as.CurrentWeather(context.Background(), dto.WeatherRequestDto{
 		Coords: &dto.Coords{
 			Latitude:  50.000691,
 			Longitude: 36.215194,
