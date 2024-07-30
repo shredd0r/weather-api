@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"weather-api/client/http"
+	"weather-api/client/redis"
 	"weather-api/config"
 	"weather-api/dto"
 	"weather-api/log"
@@ -18,13 +19,14 @@ func main() {
 	ac := http.NewAccuWeatherClient(logger, hc, cfg.ApiKeys.AccuWeatherApiKey)
 	oc := http.NewOpenWeatherClient(logger, hc, cfg.ApiKeys.OpenWeatherApiKey)
 	ap := provider.NewOpenWeatherProvider(logger, oc)
-	rws := &storage.RedisWeatherStorage{}
-	rls := &storage.RedisLocationStorage{}
+	rc := redis.NewClient(&cfg.Redis)
+	rws := storage.NewRedisWeatherStorage(rc)
+	rls := storage.NewRedisLocationStorage(rc)
 	anc := http.NewApiNinjasClient(logger, hc, cfg.ApiKeys.ApiNinjasApiKey)
 	ls := service.NewLocationService(logger, rls, ac, anc)
 	as := service.NewWeatherService(logger, dto.WeatherForecasterAccuWeather, ls, ap, rws)
 
-	resp, err := as.CurrentWeather(context.Background(), dto.WeatherRequestDto{
+	resp, _ := as.DailyWeather(context.Background(), dto.WeatherRequestDto{
 		Coords: &dto.Coords{
 			Latitude:  50.000691,
 			Longitude: 36.215194,
@@ -33,8 +35,9 @@ func main() {
 		Unit:   dto.UnitMetric,
 	})
 
-	logger.Error(err)
-	logger.Info(*resp)
+	for _, w := range *resp {
+		logger.Info(w.String())
+	}
 
 	//port := "8080"
 

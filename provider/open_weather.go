@@ -8,7 +8,10 @@ import (
 	"weather-api/util"
 )
 
-const dayInResponse = 5
+const countDays = 5
+const countWeatherInfoPerDay = 8
+
+var countWeatherInfo = countWeatherInfoPerDay * countDays
 
 type OpenWeatherProvider struct {
 	logger log.Logger
@@ -72,7 +75,7 @@ func (p OpenWeatherProvider) getUnits(unit dto.Unit) dto.OpenWeatherUnits {
 }
 
 func (p OpenWeatherProvider) mapToHourlyWeathers(response *dto.OpenWeatherHourlyWeatherResponseDto) *[]*dto.HourlyWeather {
-	lenArray := len(response.ListHourlyInfo) / dayInResponse
+	lenArray := countWeatherInfoPerDay
 	hourlyWeathers := make([]*dto.HourlyWeather, lenArray)
 
 	for index := 0; index < lenArray; index++ {
@@ -86,7 +89,7 @@ func (p OpenWeatherProvider) mapOpenWeatherForecastInfoDtoToHourlyWeather(weathe
 	precipitationType := p.getPrecipitationType(weatherForecast)
 
 	return &dto.HourlyWeather{
-		Temperature:                &weatherForecast.MainInfo.Temperature,
+		CurrentTemperature:         &weatherForecast.MainInfo.Temperature,
 		FeelsLikeTemperature:       &weatherForecast.MainInfo.FeelsLike,
 		UVIndex:                    nil,
 		EpochTime:                  weatherForecast.DateTimeForecast,
@@ -102,11 +105,11 @@ func (p OpenWeatherProvider) mapOpenWeatherForecastInfoDtoToHourlyWeather(weathe
 }
 
 func (p OpenWeatherProvider) mapToDailyWeathers(response *dto.OpenWeatherHourlyWeatherResponseDto) *[]*dto.DailyWeather {
-	lenArray := dayInResponse
+	lenArray := countDays
 	dailyWeathers := make([]*dto.DailyWeather, lenArray)
 
-	for index := 0; index < len(response.ListHourlyInfo); index = index + 3 {
-		dailyWeathers[index] = p.mapOpenWeatherForecastInfoDtoToDailyWeather(response.ListHourlyInfo[index])
+	for index := 0; index < lenArray; index++ {
+		dailyWeathers[index] = p.mapOpenWeatherForecastInfoDtoToDailyWeather(response.ListHourlyInfo[index+countWeatherInfoPerDay])
 	}
 
 	return &dailyWeathers

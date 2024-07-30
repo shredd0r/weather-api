@@ -18,7 +18,7 @@ type OpenWeatherRequestDto struct {
 
 type OpenWeatherForecastRequestDto struct {
 	OpenWeatherRequestDto
-	Count int `json:"cnt"`
+	Count *int `json:"cnt"`
 }
 
 type OpenWeatherCurrentWeatherResponseDto struct {

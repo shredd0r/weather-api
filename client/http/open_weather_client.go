@@ -61,7 +61,9 @@ func (c *OpenWeatherClient) getQueryParamByRequest(request dto.OpenWeatherReques
 
 func (c *OpenWeatherClient) getQueryParamsForForecast(request dto.OpenWeatherForecastRequestDto) string {
 	queryParams := c.getQueryParamByRequest(request.OpenWeatherRequestDto)
-	queryParams.Add("cnt", strconv.FormatInt(int64(request.Count), request.Count))
+	if request.Count != nil {
+		queryParams.Add("cnt", strconv.Itoa(*request.Count))
+	}
 
 	return queryParams.Encode()
 }

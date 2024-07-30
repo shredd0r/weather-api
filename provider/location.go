@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"hash"
+	"time"
 	"weather-api/client/http"
 	"weather-api/dto"
 	"weather-api/log"
@@ -62,7 +63,7 @@ func (p *LocationProviderImpl) LocationByAddressHash(ctx context.Context, coords
 				Coords:                 *coords,
 				AccuWeatherLocationKey: locationKey,
 			}
-			p.storeNewLocation(ctx, location)
+			p.storeNewLocation(ctx, location, addressHash)
 		}
 	}
 	return location, nil
@@ -88,6 +89,7 @@ func (p *LocationProviderImpl) getAddressHashByCoordsFromNinjaApi(coords *dto.Co
 }
 
 func (p *LocationProviderImpl) storeAddressHash(ctx context.Context, coords *dto.Coords, addressHash string) {
+	lastTime := time.Now().UnixMilli()
 	p.logger.Info("start store address hash to location storage")
 
 	go func() {
@@ -97,7 +99,7 @@ func (p *LocationProviderImpl) storeAddressHash(ctx context.Context, coords *dto
 		}
 	}()
 	go func() {
-		err := p.locationStorage.UpdateLastTimeGetAddressHash(ctx, coords)
+		err := p.locationStorage.UpdateLastTimeGetAddressHash(ctx, coords, lastTime)
 		if err != nil {
 			p.logger.Errorf("error when try update last time get address hash, error: %s", err.Error())
 		}
@@ -119,13 +121,13 @@ func (p *LocationProviderImpl) getLocationKeyFromAccuWeather(coords *dto.Coords)
 	return resp.Key, nil
 }
 
-func (p *LocationProviderImpl) storeNewLocation(ctx context.Context, location *dto.Location) {
+func (p *LocationProviderImpl) storeNewLocation(ctx context.Context, location *dto.Location, addressHash string) {
 	p.logger.Info("start store new location")
 
 	go func() {
-		err := p.locationStorage.SaveLocation(ctx, location)
+		err := p.locationStorage.SaveLocation(ctx, *location, addressHash)
 		if err != nil {
-			p.logger.Error("error when try save new location, error: %s", err.Error())
+			p.logger.Errorf("error when try save new location, error: %s", err.Error())
 		}
 	}()
 }
