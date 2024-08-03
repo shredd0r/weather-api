@@ -17,10 +17,10 @@ const (
 )
 
 type RedisWeatherStorage struct {
-	client *redis.Client
+	client redis.Client
 }
 
-func NewRedisWeatherStorage(client *redis.Client) WeatherStorage {
+func NewRedisWeatherStorage(client redis.Client) WeatherStorage {
 	return &RedisWeatherStorage{
 		client: client,
 	}

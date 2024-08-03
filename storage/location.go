@@ -8,10 +8,10 @@ import (
 )
 
 type RedisLocationStorage struct {
-	client *redis.Client
+	client redis.Client
 }
 
-func NewRedisLocationStorage(client *redis.Client) LocationStorage {
+func NewRedisLocationStorage(client redis.Client) LocationStorage {
 	return &RedisLocationStorage{
 		client: client,
 	}
