@@ -9,18 +9,18 @@ import (
 	"weather-api/client/redis"
 )
 
-func setObjToRedis[T any](ctx context.Context, client *redis.Client, key string, value T) error {
+func setObjWithInnerFieldToRedis[T any](ctx context.Context, client *redis.Client, key string, innerField string, value T) error {
 	bytes, err := json.Marshal(value)
 	if err != nil {
 		return err
 	}
 
-	return client.Set(ctx, key, bytes)
+	return client.HSet(ctx, key, innerField, bytes)
 }
 
-func getObjFromRedis[T any](ctx context.Context, client *redis.Client, key string, valueResp *T) error {
+func getObjWithInnerFieldFromRedis[T any](ctx context.Context, client *redis.Client, key string, innerField string, valueResp *T) error {
+	bytes, err := getBytesWithInnerFieldFromRedis(ctx, client, key, innerField)
 
-	bytes, err := getBytesFromRedis(ctx, client, key)
 	if err != nil {
 		return err
 	}
@@ -34,8 +34,8 @@ func getObjFromRedis[T any](ctx context.Context, client *redis.Client, key strin
 	return nil
 }
 
-func getStringFromRedis(ctx context.Context, client *redis.Client, key string) (string, error) {
-	bytes, err := getBytesFromRedis(ctx, client, key)
+func getStringWithInnerFieldsFromRedis(ctx context.Context, client *redis.Client, key string, innerField string) (string, error) {
+	bytes, err := getBytesWithInnerFieldFromRedis(ctx, client, key, innerField)
 	if err != nil {
 		return "", err
 	}
@@ -43,8 +43,8 @@ func getStringFromRedis(ctx context.Context, client *redis.Client, key string) (
 	return string(bytes), err
 }
 
-func getInt64FromRedis(ctx context.Context, client *redis.Client, key string) (int64, error) {
-	bytes, err := getBytesFromRedis(ctx, client, key)
+func getInt64WithInnerFieldsFromRedis(ctx context.Context, client *redis.Client, key string, innerField string) (int64, error) {
+	bytes, err := getBytesWithInnerFieldFromRedis(ctx, client, key, innerField)
 	if err != nil {
 		return -1, err
 	}
@@ -52,8 +52,8 @@ func getInt64FromRedis(ctx context.Context, client *redis.Client, key string) (i
 	return int64(binary.BigEndian.Uint64(bytes)), err
 }
 
-func getBytesFromRedis(ctx context.Context, client *redis.Client, key string) ([]byte, error) {
-	bytes, err := client.Get(ctx, key)
+func getBytesWithInnerFieldFromRedis(ctx context.Context, client *redis.Client, key string, innerField string) ([]byte, error) {
+	bytes, err := client.HGet(ctx, key, innerField)
 
 	if err != nil {
 		if errors.Is(err, goredis.Nil) {

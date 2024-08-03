@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"sync"
 	"weather-api/client/http"
 	"weather-api/dto"
 	"weather-api/log"
@@ -14,13 +15,14 @@ type LocationService interface {
 }
 
 type LocationServiceImpl struct {
+	wg               *sync.WaitGroup
 	locationProvider provider.LocationProvider
 }
 
-func NewLocationService(logger log.Logger, locationStorage storage.LocationStorage,
+func NewLocationService(logger log.Logger, wg *sync.WaitGroup, locationStorage storage.LocationStorage,
 	accuWeatherClient http.AccuWeatherInterface, apiNinjasClient http.ApiNinjasInterface) LocationService {
 	return &LocationServiceImpl{
-		locationProvider: provider.NewLocationProvider(logger, locationStorage, accuWeatherClient, apiNinjasClient),
+		locationProvider: provider.NewLocationProvider(logger, wg, locationStorage, accuWeatherClient, apiNinjasClient),
 	}
 }
 

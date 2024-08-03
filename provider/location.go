@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"hash"
+	"sync"
 	"time"
 	"weather-api/client/http"
 	"weather-api/dto"
@@ -14,6 +15,7 @@ import (
 )
 
 type LocationProviderImpl struct {
+	wg                *sync.WaitGroup
 	hasher            hash.Hash
 	logger            log.Logger
 	locationStorage   storage.LocationStorage
@@ -21,9 +23,10 @@ type LocationProviderImpl struct {
 	apiNinjaClient    http.ApiNinjasInterface
 }
 
-func NewLocationProvider(logger log.Logger, locationStorage storage.LocationStorage,
+func NewLocationProvider(logger log.Logger, wg *sync.WaitGroup, locationStorage storage.LocationStorage,
 	accuWeatherClient http.AccuWeatherInterface, apiNinjasClient http.ApiNinjasInterface) LocationProvider {
 	return &LocationProviderImpl{
+		wg:                wg,
 		hasher:            md5.New(),
 		logger:            logger,
 		locationStorage:   locationStorage,
@@ -92,18 +95,25 @@ func (p *LocationProviderImpl) storeAddressHash(ctx context.Context, coords *dto
 	lastTime := time.Now().UnixMilli()
 	p.logger.Info("start store address hash to location storage")
 
+	p.wg.Add(2)
 	go func() {
+		defer p.wg.Done()
+
 		err := p.locationStorage.AddNewCoords(ctx, coords, addressHash)
 		if err != nil {
 			p.logger.Errorf("error when try new coords in storage, error: %s", err.Error())
 		}
 	}()
 	go func() {
+		defer p.wg.Done()
+
 		err := p.locationStorage.UpdateLastTimeGetAddressHash(ctx, coords, lastTime)
 		if err != nil {
 			p.logger.Errorf("error when try update last time get address hash, error: %s", err.Error())
 		}
 	}()
+
+	p.wg.Wait()
 
 	return
 }
