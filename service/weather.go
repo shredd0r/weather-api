@@ -46,7 +46,7 @@ func (s *WeatherServiceImpl) CurrentWeather(ctx context.Context, request dto.Wea
 		request,
 		s.forecaster,
 		s.getWeatherRequestProviderDto,
-		s.weatherStorage.GetCurrentWeatherBy,
+		s.weatherStorage.GetCurrentWeather,
 		s.weatherProvider.CurrentWeather,
 		s.weatherStorage.SaveUpdatedTimeCurrentWeather,
 		s.weatherStorage.SaveCurrentWeather)
@@ -59,7 +59,7 @@ func (s *WeatherServiceImpl) HourlyWeather(ctx context.Context, request dto.Weat
 		request,
 		s.forecaster,
 		s.getWeatherRequestProviderDto,
-		s.weatherStorage.GetHourlyWeatherBy,
+		s.weatherStorage.GetHourlyWeather,
 		s.weatherProvider.HourlyWeather,
 		s.weatherStorage.SaveUpdatedTimeHourlyWeather,
 		s.weatherStorage.SaveHourlyWeather)
@@ -73,7 +73,7 @@ func (s *WeatherServiceImpl) DailyWeather(ctx context.Context, request dto.Weath
 		request,
 		s.forecaster,
 		s.getWeatherRequestProviderDto,
-		s.weatherStorage.GetDailyWeatherBy,
+		s.weatherStorage.GetDailyWeather,
 		s.weatherProvider.DailyWeather,
 		s.weatherStorage.SaveUpdatedTimeDailyWeather,
 		s.weatherStorage.SaveDailyWeather)

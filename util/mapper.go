@@ -1,11 +1,22 @@
 package util
 
 import (
+	"encoding/binary"
 	"fmt"
+	"strconv"
 )
 
 func Float64ToString(f float64) string {
 	return fmt.Sprintf("%.2f", f)
+}
+
+func StringToFloat64(s string) float64 {
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
+}
+
+func BytesToInt64(bytes []byte) int64 {
+	return int64(binary.BigEndian.Uint64(bytes))
 }
 
 func PercentToFloat64(percent int) float64 {

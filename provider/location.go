@@ -99,7 +99,7 @@ func (p *LocationProviderImpl) storeAddressHash(ctx context.Context, coords *dto
 	go func() {
 		defer p.wg.Done()
 
-		err := p.locationStorage.AddNewCoords(ctx, coords, addressHash)
+		err := p.locationStorage.AddCoords(ctx, coords, addressHash)
 		if err != nil {
 			p.logger.Errorf("error when try new coords in storage, error: %s", err.Error())
 		}
@@ -107,7 +107,7 @@ func (p *LocationProviderImpl) storeAddressHash(ctx context.Context, coords *dto
 	go func() {
 		defer p.wg.Done()
 
-		err := p.locationStorage.UpdateLastTimeGetAddressHash(ctx, coords, lastTime)
+		err := p.locationStorage.UpdateLastTimeUseCoords(ctx, coords, lastTime)
 		if err != nil {
 			p.logger.Errorf("error when try update last time get address hash, error: %s", err.Error())
 		}

@@ -23,6 +23,8 @@ type Logger struct {
 
 type ExpirationDuration struct {
 	WeatherInfo time.Duration `env:"WEATHER_INFO" envDefault:"3h"`
+	Coords      time.Duration `env:"COORDS" envDefault:"3h"`
+	Period      time.Duration `env:"PERIOD" envDefault:"5m"`
 }
 
 type ApiKeys struct {

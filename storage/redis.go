@@ -2,11 +2,11 @@ package storage
 
 import (
 	"context"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	goredis "github.com/redis/go-redis/v9"
 	"weather-api/client/redis"
+	"weather-api/util"
 )
 
 func setObjWithInnerFieldToRedis[T any](ctx context.Context, client redis.Client, key string, innerField string, value T) error {
@@ -49,7 +49,7 @@ func getInt64WithInnerFieldsFromRedis(ctx context.Context, client redis.Client, 
 		return -1, err
 	}
 
-	return int64(binary.BigEndian.Uint64(bytes)), err
+	return util.BytesToInt64(bytes), err
 }
 
 func getBytesWithInnerFieldFromRedis(ctx context.Context, client redis.Client, key string, innerField string) ([]byte, error) {

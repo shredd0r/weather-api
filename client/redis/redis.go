@@ -9,6 +9,7 @@ import (
 type Client interface {
 	HSet(ctx context.Context, key string, innerField string, value interface{}) error
 	HGet(ctx context.Context, key string, innerField string) ([]byte, error)
+	HDel(ctx context.Context, key string, innerField string) error
 	HGetAll(ctx context.Context, key string) (map[string][]byte, error)
 }
 
@@ -37,6 +38,10 @@ func (c *ClientImpl) HGet(ctx context.Context, key string, innerField string) ([
 	}
 
 	return resp.Bytes()
+}
+
+func (c *ClientImpl) HDel(ctx context.Context, key string, innerField string) error {
+	return c.redisClient.HDel(ctx, key, innerField).Err()
 }
 
 func (c *ClientImpl) HGetAll(ctx context.Context, key string) (map[string][]byte, error) {

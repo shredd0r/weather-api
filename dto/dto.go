@@ -1,6 +1,10 @@
 package dto
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+	"weather-api/util"
+)
 
 type Error struct {
 	Message string
@@ -68,6 +72,18 @@ type Wind struct {
 type Coords struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+}
+
+func NewCoords(strCoords string) Coords {
+	coords := strings.Split(strCoords, ",")
+	if len(coords) != 2 {
+		return Coords{}
+	}
+
+	return Coords{
+		Latitude:  util.StringToFloat64(coords[0]),
+		Longitude: util.StringToFloat64(coords[1]),
+	}
 }
 
 type Location struct {
