@@ -2,11 +2,11 @@ package http
 
 import (
 	"fmt"
+	"github.com/shredd0r/weather-api/dto"
+	"github.com/shredd0r/weather-api/log"
 	"net/http"
 	"net/url"
 	"strconv"
-	"weather-api/dto"
-	"weather-api/log"
 )
 
 var (

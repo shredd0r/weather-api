@@ -1,13 +1,13 @@
-package scheduler
+package task
 
 import (
 	"context"
+	"github.com/shredd0r/weather-api/config"
+	"github.com/shredd0r/weather-api/dto"
+	"github.com/shredd0r/weather-api/log"
+	"github.com/shredd0r/weather-api/storage"
 	"sync"
 	"time"
-	"weather-api/config"
-	"weather-api/dto"
-	"weather-api/log"
-	"weather-api/storage"
 )
 
 type baseWeatherCleaner struct {
@@ -17,11 +17,11 @@ type baseWeatherCleaner struct {
 	storage storage.WeatherStorage
 }
 
-func newBaseWeatherCleaner(logger log.Logger, cfg *config.ExpirationDuration, wg *sync.WaitGroup, storage storage.WeatherStorage) *baseWeatherCleaner {
+func newBaseWeatherCleaner(logger log.Logger, cfg *config.ExpirationDuration, storage storage.WeatherStorage) *baseWeatherCleaner {
 	return &baseWeatherCleaner{
 		logger:  logger,
 		cfg:     cfg,
-		wg:      wg,
+		wg:      &sync.WaitGroup{},
 		storage: storage,
 	}
 }
@@ -33,6 +33,7 @@ func (c *baseWeatherCleaner) workFlowForRemoveWeatherFromCache(
 	methodForRemoveWeather func(context.Context, string, dto.WeatherForecaster) error,
 	methodForRemoveLastTimeUpdated func(context.Context, string, dto.WeatherForecaster) error) {
 	go func() {
+		c.logger.Debugf("start remove weather from cache for forecaster: %s", forecaster)
 		defer c.wg.Done()
 
 		mapWithAddressHashAndLastTimeUpdated, err := methodForGetAllLastTimeUpdated(ctx, forecaster)
@@ -41,9 +42,12 @@ func (c *baseWeatherCleaner) workFlowForRemoveWeatherFromCache(
 			return
 		}
 
+		c.logger.Debugf("fined %d weather from cache", len(mapWithAddressHashAndLastTimeUpdated))
+
 		now := time.Now().UnixMilli()
 		for addressHash, lastTimeUpdated := range mapWithAddressHashAndLastTimeUpdated {
 			if isRowNeedRemove(now, lastTimeUpdated, c.cfg.WeatherInfo) {
+				c.logger.Debugf("weather for %s with addressHash: %s need remove", forecaster, addressHash)
 				c.removeDataAboutWeatherFromCache(ctx, addressHash, forecaster, methodForRemoveWeather, methodForRemoveLastTimeUpdated)
 			}
 		}
@@ -81,6 +85,8 @@ func (c *baseWeatherCleaner) removeDataAboutWeatherFromCache(
 		if err != nil {
 			c.logger.Error("error when try remove weather from cache")
 		}
+
+		c.logger.Debug("weather removed from cache")
 	}()
 
 	go func() {
@@ -90,5 +96,6 @@ func (c *baseWeatherCleaner) removeDataAboutWeatherFromCache(
 		if err != nil {
 			c.logger.Error("error when try remove last time updated weather from cache")
 		}
+		c.logger.Debug("last time updated weather removed from cache")
 	}()
 }

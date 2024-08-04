@@ -1,0 +1,24 @@
+scalar Int64
+scalar Unit
+scalar WeatherForecaster
+scalar CurrentWeather
+scalar HourlyWeather
+scalar DailyWeather
+
+type Query {
+    currentWeather(input: WeatherRequest): CurrentWeather
+    hourlyWeather(input: WeatherRequest): [HourlyWeather]
+    dailyWeather(input: WeatherRequest): [DailyWeather]
+}
+
+input WeatherRequest {
+    coords: Coords!
+    locale: String!
+    unit: Unit!
+    forecaster: WeatherForecaster!
+}
+
+input Coords {
+    latitude: Float!
+    longitude: Float!
+}

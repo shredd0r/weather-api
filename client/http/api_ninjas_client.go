@@ -1,11 +1,11 @@
 package http
 
 import (
+	"github.com/shredd0r/weather-api/dto"
+	"github.com/shredd0r/weather-api/log"
+	"github.com/shredd0r/weather-api/util"
 	"net/http"
 	"net/url"
-	"weather-api/dto"
-	"weather-api/log"
-	"weather-api/util"
 )
 
 var (

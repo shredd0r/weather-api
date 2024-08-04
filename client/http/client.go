@@ -3,9 +3,9 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"github.com/shredd0r/weather-api/log"
 	"io"
 	"net/http"
-	"weather-api/log"
 )
 
 var (

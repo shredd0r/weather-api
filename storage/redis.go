@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	goredis "github.com/redis/go-redis/v9"
-	"weather-api/client/redis"
-	"weather-api/util"
+	"github.com/shredd0r/weather-api/client/redis"
+	"github.com/shredd0r/weather-api/util"
 )
 
 func setObjWithInnerFieldToRedis[T any](ctx context.Context, client redis.Client, key string, innerField string, value T) error {

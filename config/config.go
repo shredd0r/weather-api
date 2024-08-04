@@ -6,11 +6,16 @@ import (
 )
 
 type Config struct {
-	Port               int                `env:"PORT" envDefault:"8080"`
+	Server             Server             `envPrefis:"SERVER_"`
 	Logger             Logger             `envPrefix:"LOG_"`
 	Redis              Redis              `envPrefix:"REDIS_"`
 	ExpirationDuration ExpirationDuration `envPrefix:"EXPIRATION_"`
 	ApiKeys            ApiKeys            `envPrefix:"API_KEY_"`
+}
+
+type Server struct {
+	Port             int  `env:"PORT" envDefault:"8080"`
+	PlaygroundEnable bool `env:"PLAYGROUND_ENABLE" envDefault:"true"`
 }
 
 type Redis struct {

@@ -2,9 +2,9 @@ package http
 
 import (
 	"bytes"
+	"github.com/shredd0r/weather-api/log"
 	"io"
 	"net/http"
-	"weather-api/log"
 )
 
 type LoggingTransport struct {

@@ -3,11 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/shredd0r/weather-api/client/http"
+	"github.com/shredd0r/weather-api/dto"
+	"github.com/shredd0r/weather-api/log"
+	"github.com/shredd0r/weather-api/util"
 	"time"
-	"weather-api/client/http"
-	"weather-api/dto"
-	"weather-api/log"
-	"weather-api/util"
 )
 
 type AccuWeatherProvider struct {
@@ -22,7 +22,7 @@ func NewAccuWeatherProvider(logger log.Logger, client http.AccuWeatherInterface)
 	}
 }
 
-func (p AccuWeatherProvider) CurrentWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*dto.CurrentWeather, error) {
+func (p AccuWeatherProvider) CurrentWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*dto.CurrentWeather, error) {
 	resp, err := p.client.GetCurrentWeatherInfo(p.mapToAccuWeatherRequest(request))
 
 	if err != nil {
@@ -39,7 +39,7 @@ func (p AccuWeatherProvider) CurrentWeather(ctx context.Context, request *dto.We
 	}, nil
 }
 
-func (p AccuWeatherProvider) HourlyWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*[]*dto.HourlyWeather, error) {
+func (p AccuWeatherProvider) HourlyWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*[]*dto.HourlyWeather, error) {
 	resp, err := p.client.GetHourlyWeatherInfo(p.mapToAccuWeatherRequest(request))
 
 	if err != nil {
@@ -49,7 +49,7 @@ func (p AccuWeatherProvider) HourlyWeather(ctx context.Context, request *dto.Wea
 	return p.mapHourlyResponses(*resp), nil
 }
 
-func (p AccuWeatherProvider) DailyWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*[]*dto.DailyWeather, error) {
+func (p AccuWeatherProvider) DailyWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*[]*dto.DailyWeather, error) {
 	resp, err := p.client.GetDailyWeatherInfo(p.mapToAccuWeatherRequest(request))
 
 	if err != nil {
@@ -59,7 +59,7 @@ func (p AccuWeatherProvider) DailyWeather(ctx context.Context, request *dto.Weat
 	return p.mapDailyResponse(resp), err
 }
 
-func (p AccuWeatherProvider) mapToAccuWeatherRequest(request *dto.WeatherRequestProviderDto) dto.AccuWeatherRequestDto {
+func (p AccuWeatherProvider) mapToAccuWeatherRequest(request *dto.WeatherRequestProvider) dto.AccuWeatherRequestDto {
 
 	return dto.AccuWeatherRequestDto{
 		AccuWeatherBaseRequestDto: dto.AccuWeatherBaseRequestDto{

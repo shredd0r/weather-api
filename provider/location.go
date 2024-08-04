@@ -5,13 +5,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"github.com/shredd0r/weather-api/client/http"
+	"github.com/shredd0r/weather-api/dto"
+	"github.com/shredd0r/weather-api/log"
+	"github.com/shredd0r/weather-api/storage"
 	"hash"
 	"sync"
 	"time"
-	"weather-api/client/http"
-	"weather-api/dto"
-	"weather-api/log"
-	"weather-api/storage"
 )
 
 type LocationProviderImpl struct {
@@ -23,10 +23,10 @@ type LocationProviderImpl struct {
 	apiNinjaClient    http.ApiNinjasInterface
 }
 
-func NewLocationProvider(logger log.Logger, wg *sync.WaitGroup, locationStorage storage.LocationStorage,
+func NewLocationProvider(logger log.Logger, locationStorage storage.LocationStorage,
 	accuWeatherClient http.AccuWeatherInterface, apiNinjasClient http.ApiNinjasInterface) LocationProvider {
 	return &LocationProviderImpl{
-		wg:                wg,
+		wg:                &sync.WaitGroup{},
 		hasher:            md5.New(),
 		logger:            logger,
 		locationStorage:   locationStorage,

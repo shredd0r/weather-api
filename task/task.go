@@ -1,11 +1,11 @@
-package scheduler
+package task
 
 import (
 	"context"
 	"time"
 )
 
-type Scheduler interface {
+type Task interface {
 	Run(ctx context.Context)
 }
 

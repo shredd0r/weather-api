@@ -2,10 +2,10 @@ package provider
 
 import (
 	"context"
-	"weather-api/client/http"
-	"weather-api/dto"
-	"weather-api/log"
-	"weather-api/util"
+	"github.com/shredd0r/weather-api/client/http"
+	"github.com/shredd0r/weather-api/dto"
+	"github.com/shredd0r/weather-api/log"
+	"github.com/shredd0r/weather-api/util"
 )
 
 const countDays = 5
@@ -25,7 +25,7 @@ func NewOpenWeatherProvider(logger log.Logger, client http.OpenWeatherInterface)
 	}
 }
 
-func (p OpenWeatherProvider) CurrentWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*dto.CurrentWeather, error) {
+func (p OpenWeatherProvider) CurrentWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*dto.CurrentWeather, error) {
 	resp, err := p.client.GetCurrentWeatherInfo(p.getRequest(request))
 
 	if err != nil {
@@ -36,14 +36,12 @@ func (p OpenWeatherProvider) CurrentWeather(ctx context.Context, request *dto.We
 		EpochTime:            resp.EpochTime,
 		Visibility:           util.PercentToFloat64Pointer(&resp.Visibility),
 		CurrentTemperature:   &resp.Main.Temperature,
-		MinTemperature:       &resp.Main.MinTemperature,
-		MaxTemperature:       &resp.Main.MaxTemperature,
 		FeelsLikeTemperature: &resp.Main.FeelsLike,
 		IconResource:         nil,
 	}, nil
 }
 
-func (p OpenWeatherProvider) HourlyWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*[]*dto.HourlyWeather, error) {
+func (p OpenWeatherProvider) HourlyWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*[]*dto.HourlyWeather, error) {
 	resp, err := p.client.GetForecastWeatherInfo(p.getForecastRequest(request))
 
 	if err != nil {
@@ -53,7 +51,7 @@ func (p OpenWeatherProvider) HourlyWeather(ctx context.Context, request *dto.Wea
 	return p.mapToHourlyWeathers(resp), nil
 }
 
-func (p OpenWeatherProvider) DailyWeather(ctx context.Context, request *dto.WeatherRequestProviderDto) (*[]*dto.DailyWeather, error) {
+func (p OpenWeatherProvider) DailyWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*[]*dto.DailyWeather, error) {
 	resp, err := p.client.GetForecastWeatherInfo(p.getForecastRequest(request))
 
 	if err != nil {
@@ -170,13 +168,13 @@ func (p OpenWeatherProvider) getAmountOfPrecipitation(precipitationType dto.Prec
 	}
 }
 
-func (p OpenWeatherProvider) getForecastRequest(request *dto.WeatherRequestProviderDto) dto.OpenWeatherForecastRequestDto {
+func (p OpenWeatherProvider) getForecastRequest(request *dto.WeatherRequestProvider) dto.OpenWeatherForecastRequestDto {
 	return dto.OpenWeatherForecastRequestDto{
 		OpenWeatherRequestDto: p.getRequest(request),
 	}
 }
 
-func (p OpenWeatherProvider) getRequest(request *dto.WeatherRequestProviderDto) dto.OpenWeatherRequestDto {
+func (p OpenWeatherProvider) getRequest(request *dto.WeatherRequestProvider) dto.OpenWeatherRequestDto {
 	return dto.OpenWeatherRequestDto{
 		Latitude:  request.Location.Coords.Latitude,
 		Longitude: request.Location.Coords.Longitude,

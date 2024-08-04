@@ -1,12 +1,12 @@
 package test
 
 import (
+	"github.com/shredd0r/weather-api/client/http"
+	"github.com/shredd0r/weather-api/config"
+	"github.com/shredd0r/weather-api/dto"
+	"github.com/shredd0r/weather-api/log"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"weather-api/client/http"
-	"weather-api/config"
-	"weather-api/dto"
-	"weather-api/log"
 )
 
 func TestApiNinjasGetGeocodingInfo(t *testing.T) {

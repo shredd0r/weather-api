@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"github.com/redis/go-redis/v9"
-	"weather-api/config"
+	"github.com/shredd0r/weather-api/config"
 )
 
 type Client interface {

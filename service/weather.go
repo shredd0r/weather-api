@@ -3,18 +3,18 @@ package service
 import (
 	"context"
 	"errors"
+	"github.com/shredd0r/weather-api/dto"
+	"github.com/shredd0r/weather-api/log"
+	"github.com/shredd0r/weather-api/provider"
+	"github.com/shredd0r/weather-api/storage"
 	"sync"
 	"time"
-	"weather-api/dto"
-	"weather-api/log"
-	"weather-api/provider"
-	"weather-api/storage"
 )
 
 type WeatherService interface {
-	CurrentWeather(ctx context.Context, request dto.WeatherRequestDto) (*dto.CurrentWeather, error)
-	HourlyWeather(ctx context.Context, request dto.WeatherRequestDto) (*[]*dto.HourlyWeather, error)
-	DailyWeather(ctx context.Context, request dto.WeatherRequestDto) (*[]*dto.DailyWeather, error)
+	CurrentWeather(ctx context.Context, request dto.WeatherRequest) (*dto.CurrentWeather, error)
+	HourlyWeather(ctx context.Context, request dto.WeatherRequest) (*[]*dto.HourlyWeather, error)
+	DailyWeather(ctx context.Context, request dto.WeatherRequest) (*[]*dto.DailyWeather, error)
 }
 
 type WeatherServiceImpl struct {
@@ -26,11 +26,11 @@ type WeatherServiceImpl struct {
 	weatherStorage  storage.WeatherStorage
 }
 
-func NewWeatherService(logger log.Logger, wg *sync.WaitGroup, forecaster dto.WeatherForecaster, locationService LocationService,
+func NewWeatherService(logger log.Logger, forecaster dto.WeatherForecaster, locationService LocationService,
 	weatherProvider provider.WeatherProvider, weatherStorage storage.WeatherStorage) WeatherService {
 	return &WeatherServiceImpl{
 		logger:          logger,
-		wg:              wg,
+		wg:              &sync.WaitGroup{},
 		forecaster:      forecaster,
 		locationService: locationService,
 		weatherProvider: weatherProvider,
@@ -38,11 +38,10 @@ func NewWeatherService(logger log.Logger, wg *sync.WaitGroup, forecaster dto.Wea
 	}
 }
 
-func (s *WeatherServiceImpl) CurrentWeather(ctx context.Context, request dto.WeatherRequestDto) (*dto.CurrentWeather, error) {
+func (s *WeatherServiceImpl) CurrentWeather(ctx context.Context, request dto.WeatherRequest) (*dto.CurrentWeather, error) {
 	return workflowGetWeatherFromProviderOrStorage[dto.CurrentWeather](
 		s.logger,
 		ctx,
-		s.wg,
 		request,
 		s.forecaster,
 		s.getWeatherRequestProviderDto,
@@ -51,11 +50,10 @@ func (s *WeatherServiceImpl) CurrentWeather(ctx context.Context, request dto.Wea
 		s.weatherStorage.SaveUpdatedTimeCurrentWeather,
 		s.weatherStorage.SaveCurrentWeather)
 }
-func (s *WeatherServiceImpl) HourlyWeather(ctx context.Context, request dto.WeatherRequestDto) (*[]*dto.HourlyWeather, error) {
+func (s *WeatherServiceImpl) HourlyWeather(ctx context.Context, request dto.WeatherRequest) (*[]*dto.HourlyWeather, error) {
 	return workflowGetWeatherFromProviderOrStorage[[]*dto.HourlyWeather](
 		s.logger,
 		ctx,
-		s.wg,
 		request,
 		s.forecaster,
 		s.getWeatherRequestProviderDto,
@@ -65,11 +63,10 @@ func (s *WeatherServiceImpl) HourlyWeather(ctx context.Context, request dto.Weat
 		s.weatherStorage.SaveHourlyWeather)
 }
 
-func (s *WeatherServiceImpl) DailyWeather(ctx context.Context, request dto.WeatherRequestDto) (*[]*dto.DailyWeather, error) {
+func (s *WeatherServiceImpl) DailyWeather(ctx context.Context, request dto.WeatherRequest) (*[]*dto.DailyWeather, error) {
 	return workflowGetWeatherFromProviderOrStorage[[]*dto.DailyWeather](
 		s.logger,
 		ctx,
-		s.wg,
 		request,
 		s.forecaster,
 		s.getWeatherRequestProviderDto,
@@ -79,13 +76,13 @@ func (s *WeatherServiceImpl) DailyWeather(ctx context.Context, request dto.Weath
 		s.weatherStorage.SaveDailyWeather)
 }
 
-func (s *WeatherServiceImpl) getWeatherRequestProviderDto(ctx context.Context, request dto.WeatherRequestDto) (*dto.WeatherRequestProviderDto, error) {
+func (s *WeatherServiceImpl) getWeatherRequestProviderDto(ctx context.Context, request dto.WeatherRequest) (*dto.WeatherRequestProvider, error) {
 	location, err := s.locationService.LocationByCoords(ctx, request.Coords)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.WeatherRequestProviderDto{
+	return &dto.WeatherRequestProvider{
 		Location: *location,
 		Locale:   request.Locale,
 		Unit:     request.Unit,
@@ -93,13 +90,14 @@ func (s *WeatherServiceImpl) getWeatherRequestProviderDto(ctx context.Context, r
 }
 
 func workflowGetWeatherFromProviderOrStorage[T any](
-	logger log.Logger, ctx context.Context, wg *sync.WaitGroup, request dto.WeatherRequestDto, forecaster dto.WeatherForecaster,
-	methodForGetWeatherProviderRequest func(ctx context.Context, request dto.WeatherRequestDto) (*dto.WeatherRequestProviderDto, error),
+	logger log.Logger, ctx context.Context, request dto.WeatherRequest, forecaster dto.WeatherForecaster,
+	methodForGetWeatherProviderRequest func(ctx context.Context, request dto.WeatherRequest) (*dto.WeatherRequestProvider, error),
 	methodForGetFromStorage func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster) (*T, error),
-	methodForGetFromProvider func(ctx context.Context, request *dto.WeatherRequestProviderDto) (*T, error),
+	methodForGetFromProvider func(ctx context.Context, request *dto.WeatherRequestProvider) (*T, error),
 	methodForSaveUpdatedTime func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, lastTime int64) error,
 	methodForSaveWeather func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather T) error) (*T, error) {
 
+	wg := &sync.WaitGroup{}
 	r, err := methodForGetWeatherProviderRequest(ctx, request)
 	if err != nil {
 		return nil, err

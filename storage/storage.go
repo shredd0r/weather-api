@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
-	"weather-api/dto"
+	"github.com/shredd0r/weather-api/dto"
 )
 
 var (

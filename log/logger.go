@@ -2,8 +2,8 @@ package log
 
 import (
 	"fmt"
+	"github.com/shredd0r/weather-api/config"
 	"github.com/sirupsen/logrus"
-	"weather-api/config"
 )
 
 var std = logrus.New()

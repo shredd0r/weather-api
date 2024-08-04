@@ -10,8 +10,8 @@
 package mock_http
 
 import (
+	dto "github.com/shredd0r/weather-api/dto"
 	reflect "reflect"
-	dto "weather-api/dto"
 
 	gomock "go.uber.org/mock/gomock"
 )

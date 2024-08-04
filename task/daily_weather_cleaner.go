@@ -1,20 +1,19 @@
-package scheduler
+package task
 
 import (
 	"context"
-	"sync"
-	"weather-api/config"
-	"weather-api/log"
-	"weather-api/storage"
+	"github.com/shredd0r/weather-api/config"
+	"github.com/shredd0r/weather-api/log"
+	"github.com/shredd0r/weather-api/storage"
 )
 
 type DailyWeatherCleaner struct {
 	*baseWeatherCleaner
 }
 
-func NewDailyWeatherCleaner(logger log.Logger, cfg *config.ExpirationDuration, wg *sync.WaitGroup, storage storage.WeatherStorage) Scheduler {
+func NewDailyWeatherCleaner(logger log.Logger, cfg *config.ExpirationDuration, storage storage.WeatherStorage) Task {
 	return &DailyWeatherCleaner{
-		baseWeatherCleaner: newBaseWeatherCleaner(logger, cfg, wg, storage),
+		baseWeatherCleaner: newBaseWeatherCleaner(logger, cfg, storage),
 	}
 }
 

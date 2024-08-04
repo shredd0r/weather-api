@@ -2,8 +2,8 @@ package dto
 
 import (
 	"encoding/json"
+	"github.com/shredd0r/weather-api/util"
 	"strings"
-	"weather-api/util"
 )
 
 type Error struct {
@@ -97,13 +97,13 @@ type LocationInfo struct {
 	AccuWeatherLocationKey string
 }
 
-type WeatherRequestDto struct {
+type WeatherRequest struct {
 	Coords *Coords
 	Locale string
 	Unit
 }
 
-type WeatherRequestProviderDto struct {
+type WeatherRequestProvider struct {
 	Location LocationInfo
 	Locale   string
 	Unit
