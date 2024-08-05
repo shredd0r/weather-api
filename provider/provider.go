@@ -18,6 +18,7 @@ type CacheWeatherProvider interface {
 }
 
 type LocationProvider interface {
+	FindGeocoding(ctx context.Context, request dto.GeocodingRequest) (*[]*dto.Geocoding, error)
 	GetAddressHashByCoords(ctx context.Context, coords *dto.Coords) (string, error)
 	LocationByAddressHash(ctx context.Context, coords *dto.Coords, addressHash string) (*dto.Location, error)
 }

@@ -10,6 +10,9 @@ COPY . .
 
 RUN go build -o /app/weather-api
 
+FROM builder AS run-test-stage
+RUN go test -v ./...
+
 FROM alpine
 
 WORKDIR /app

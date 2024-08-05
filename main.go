@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"github.com/shredd0r/weather-api/config"
 	"github.com/shredd0r/weather-api/log"
 	"github.com/shredd0r/weather-api/server"

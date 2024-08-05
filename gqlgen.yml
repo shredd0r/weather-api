@@ -95,3 +95,9 @@ models:
   DailyWeather:
     model:
       - github.com/shredd0r/weather-api/graph/marshals.DailyWeather
+  GeocodingRequest:
+    model:
+      - github.com/shredd0r/weather-api/graph/marshals.GeocodingRequest
+  Geocoding:
+    model:
+      - github.com/shredd0r/weather-api/graph/marshals.Geocoding

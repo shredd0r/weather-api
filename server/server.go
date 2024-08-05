@@ -50,7 +50,7 @@ func NewServer(cfg *config.Config, logger log.Logger) *Server {
 		cfg:              cfg,
 		logger:           logger,
 		wg:               &sync.WaitGroup{},
-		graphqlApi:       api.NewWeatherGraphqlApi(accuWeatherService, openWeatherService),
+		graphqlApi:       api.NewWeatherGraphqlApi(locationService, accuWeatherService, openWeatherService),
 		listCleanerTasks: initiateTaskList(&cfg.ExpirationDuration, logger, redisWeatherStorage, redisLocationStorage),
 	}
 }

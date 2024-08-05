@@ -35,6 +35,20 @@ func NewLocationProvider(logger log.Logger, locationStorage storage.LocationStor
 	}
 }
 
+func (p *LocationProviderImpl) FindGeocoding(ctx context.Context, request dto.GeocodingRequest) (*[]*dto.Geocoding, error) {
+	resp, err := p.apiNinjaClient.GetGeocoding(dto.ApiNinjasGeocodingRequestDto{
+		City:    request.City,
+		State:   request.State,
+		Country: request.Country,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return p.mapGeocodingResponses(*resp), nil
+}
+
 func (p *LocationProviderImpl) GetAddressHashByCoords(ctx context.Context, coords *dto.Coords) (addressHash string, err error) {
 	addressHash, err = p.locationStorage.GetAddressHashByCoords(ctx, coords)
 	if err != nil {
@@ -140,4 +154,24 @@ func (p *LocationProviderImpl) storeNewLocation(ctx context.Context, location *d
 			p.logger.Errorf("error when try save new location, error: %s", err.Error())
 		}
 	}()
+}
+
+func (p *LocationProviderImpl) mapGeocodingResponse(response *dto.ApiNinjasGeocodingResponseDto) *dto.Geocoding {
+	return &dto.Geocoding{
+		Name:      response.Name,
+		Latitude:  response.Latitude,
+		Longitude: response.Longitude,
+		Country:   response.Country,
+		State:     response.State,
+	}
+}
+
+func (p *LocationProviderImpl) mapGeocodingResponses(responses []*dto.ApiNinjasGeocodingResponseDto) *[]*dto.Geocoding {
+	geocodingResponses := make([]*dto.Geocoding, len(responses))
+
+	for index := range responses {
+		geocodingResponses[index] = p.mapGeocodingResponse(responses[index])
+	}
+
+	return &geocodingResponses
 }

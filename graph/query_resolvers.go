@@ -10,6 +10,17 @@ import (
 	"github.com/shredd0r/weather-api/graph/model"
 )
 
+// FindGeocoding is the resolver for the findGeocoding field.
+func (r *queryResolver) FindGeocoding(ctx context.Context, input *dto.GeocodingRequest) ([]*dto.Geocoding, error) {
+	resp, err := r.GraphqlApi.FindGeocoding(ctx, input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return *resp, nil
+}
+
 // CurrentWeather is the resolver for the currentWeather field.
 func (r *queryResolver) CurrentWeather(ctx context.Context, input *model.WeatherRequest) (*dto.CurrentWeather, error) {
 	return r.GraphqlApi.CurrentWeather(ctx, input)

@@ -4,8 +4,11 @@ scalar WeatherForecaster
 scalar CurrentWeather
 scalar HourlyWeather
 scalar DailyWeather
+scalar Geocoding
+scalar GeocodingRequest
 
 type Query {
+    findGeocoding(input: GeocodingRequest): [Geocoding]
     currentWeather(input: WeatherRequest): CurrentWeather
     hourlyWeather(input: WeatherRequest): [HourlyWeather]
     dailyWeather(input: WeatherRequest): [DailyWeather]

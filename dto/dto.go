@@ -97,6 +97,36 @@ type LocationInfo struct {
 	AccuWeatherLocationKey string
 }
 
+type GeocodingRequest struct {
+	City    string
+	State   string
+	Country string
+}
+
+type Geocoding struct {
+	Name      string
+	Latitude  float64
+	Longitude float64
+	Country   string
+	State     string
+}
+
+type ReverseGeocodingRequest struct {
+	Latitude  float64
+	Longitude float64
+}
+
+type ReverseGeocoding struct {
+	Country string
+	Name    string
+	State   string
+}
+
+type GeoPositionResponse struct {
+	Version int
+	Key     string
+}
+
 type WeatherRequest struct {
 	Coords *Coords
 	Locale string

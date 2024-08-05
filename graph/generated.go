@@ -51,11 +51,13 @@ type ComplexityRoot struct {
 	Query struct {
 		CurrentWeather func(childComplexity int, input *model.WeatherRequest) int
 		DailyWeather   func(childComplexity int, input *model.WeatherRequest) int
+		FindGeocoding  func(childComplexity int, input *dto.GeocodingRequest) int
 		HourlyWeather  func(childComplexity int, input *model.WeatherRequest) int
 	}
 }
 
 type QueryResolver interface {
+	FindGeocoding(ctx context.Context, input *dto.GeocodingRequest) ([]*dto.Geocoding, error)
 	CurrentWeather(ctx context.Context, input *model.WeatherRequest) (*dto.CurrentWeather, error)
 	HourlyWeather(ctx context.Context, input *model.WeatherRequest) ([]*dto.HourlyWeather, error)
 	DailyWeather(ctx context.Context, input *model.WeatherRequest) ([]*dto.DailyWeather, error)
@@ -103,6 +105,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.DailyWeather(childComplexity, args["input"].(*model.WeatherRequest)), true
+
+	case "Query.findGeocoding":
+		if e.complexity.Query.FindGeocoding == nil {
+			break
+		}
+
+		args, err := ec.field_Query_findGeocoding_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FindGeocoding(childComplexity, args["input"].(*dto.GeocodingRequest)), true
 
 	case "Query.hourlyWeather":
 		if e.complexity.Query.HourlyWeather == nil {
@@ -207,7 +221,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "schema/location.graphqls" "schema/weather.graphqls"
+//go:embed "schema/query.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -219,8 +233,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
-	{Name: "schema/location.graphqls", Input: sourceData("schema/location.graphqls"), BuiltIn: false},
-	{Name: "schema/weather.graphqls", Input: sourceData("schema/weather.graphqls"), BuiltIn: false},
+	{Name: "schema/query.graphqls", Input: sourceData("schema/query.graphqls"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -265,6 +278,21 @@ func (ec *executionContext) field_Query_dailyWeather_args(ctx context.Context, r
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalOWeatherRequest2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋgraphᚋmodelᚐWeatherRequest(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_findGeocoding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *dto.GeocodingRequest
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOGeocodingRequest2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocodingRequest(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -325,6 +353,58 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Query_findGeocoding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_findGeocoding(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().FindGeocoding(rctx, fc.Args["input"].(*dto.GeocodingRequest))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*dto.Geocoding)
+	fc.Result = res
+	return ec.marshalOGeocoding2ᚕᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocoding(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_findGeocoding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Geocoding does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_findGeocoding_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Query_currentWeather(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_currentWeather(ctx, field)
@@ -2493,6 +2573,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "findGeocoding":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_findGeocoding(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "currentWeather":
 			field := field
 
@@ -3329,6 +3428,70 @@ func (ec *executionContext) marshalODailyWeather2ᚖgithubᚗcomᚋshredd0rᚋwe
 		return graphql.Null
 	}
 	res := marshals.MarshalDailyWeather(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOGeocoding2ᚕᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocoding(ctx context.Context, v interface{}) ([]*dto.Geocoding, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*dto.Geocoding, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOGeocoding2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocoding(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOGeocoding2ᚕᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocoding(ctx context.Context, sel ast.SelectionSet, v []*dto.Geocoding) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOGeocoding2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocoding(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOGeocoding2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocoding(ctx context.Context, v interface{}) (*dto.Geocoding, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := marshals.UnmarshalGeocoding(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOGeocoding2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocoding(ctx context.Context, sel ast.SelectionSet, v *dto.Geocoding) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := marshals.MarshalGeocoding(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOGeocodingRequest2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocodingRequest(ctx context.Context, v interface{}) (*dto.GeocodingRequest, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := marshals.UnmarshalGeocodingRequest(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOGeocodingRequest2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐGeocodingRequest(ctx context.Context, sel ast.SelectionSet, v *dto.GeocodingRequest) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := marshals.MarshalGeocodingRequest(*v)
 	return res
 }
 

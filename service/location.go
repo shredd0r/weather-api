@@ -7,15 +7,14 @@ import (
 	"github.com/shredd0r/weather-api/log"
 	"github.com/shredd0r/weather-api/provider"
 	"github.com/shredd0r/weather-api/storage"
-	"sync"
 )
 
 type LocationService interface {
+	FindGeocoding(ctx context.Context, request *dto.GeocodingRequest) (*[]*dto.Geocoding, error)
 	LocationByCoords(ctx context.Context, coords *dto.Coords) (*dto.LocationInfo, error)
 }
 
 type LocationServiceImpl struct {
-	wg               *sync.WaitGroup
 	locationProvider provider.LocationProvider
 }
 
@@ -24,6 +23,10 @@ func NewLocationService(logger log.Logger, locationStorage storage.LocationStora
 	return &LocationServiceImpl{
 		locationProvider: provider.NewLocationProvider(logger, locationStorage, accuWeatherClient, apiNinjasClient),
 	}
+}
+
+func (s *LocationServiceImpl) FindGeocoding(ctx context.Context, request *dto.GeocodingRequest) (*[]*dto.Geocoding, error) {
+	return s.FindGeocoding(ctx, request)
 }
 
 func (s *LocationServiceImpl) LocationByCoords(ctx context.Context, coords *dto.Coords) (*dto.LocationInfo, error) {

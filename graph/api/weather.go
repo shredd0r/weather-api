@@ -8,15 +8,22 @@ import (
 )
 
 type WeatherGraphqlApi struct {
+	locationService    service.LocationService
 	accuWeatherService service.WeatherService
 	openWeatherService service.WeatherService
 }
 
-func NewWeatherGraphqlApi(accuWeatherService service.WeatherService, openWeatherService service.WeatherService) *WeatherGraphqlApi {
+func NewWeatherGraphqlApi(locationService service.LocationService,
+	accuWeatherService service.WeatherService,
+	openWeatherService service.WeatherService) *WeatherGraphqlApi {
 	return &WeatherGraphqlApi{
 		accuWeatherService: accuWeatherService,
 		openWeatherService: openWeatherService,
 	}
+}
+
+func (p *WeatherGraphqlApi) FindGeocoding(ctx context.Context, input *dto.GeocodingRequest) (*[]*dto.Geocoding, error) {
+	return p.locationService.FindGeocoding(ctx, input)
 }
 
 func (p *WeatherGraphqlApi) CurrentWeather(ctx context.Context, input *model.WeatherRequest) (*dto.CurrentWeather, error) {
