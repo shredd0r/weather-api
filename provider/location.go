@@ -9,14 +9,12 @@ import (
 	"github.com/shredd0r/weather-api/dto"
 	"github.com/shredd0r/weather-api/log"
 	"github.com/shredd0r/weather-api/storage"
-	"hash"
 	"sync"
 	"time"
 )
 
 type LocationProviderImpl struct {
 	wg                *sync.WaitGroup
-	hasher            hash.Hash
 	logger            log.Logger
 	locationStorage   storage.LocationStorage
 	accuWeatherClient http.AccuWeatherInterface
@@ -27,7 +25,6 @@ func NewLocationProvider(logger log.Logger, locationStorage storage.LocationStor
 	accuWeatherClient http.AccuWeatherInterface, apiNinjasClient http.ApiNinjasInterface) LocationProvider {
 	return &LocationProviderImpl{
 		wg:                &sync.WaitGroup{},
-		hasher:            md5.New(),
 		logger:            logger,
 		locationStorage:   locationStorage,
 		accuWeatherClient: accuWeatherClient,
@@ -35,7 +32,7 @@ func NewLocationProvider(logger log.Logger, locationStorage storage.LocationStor
 	}
 }
 
-func (p *LocationProviderImpl) FindGeocoding(ctx context.Context, request dto.GeocodingRequest) (*[]*dto.Geocoding, error) {
+func (p *LocationProviderImpl) FindGeocoding(ctx context.Context, request *dto.GeocodingRequest) (*[]*dto.Geocoding, error) {
 	resp, err := p.apiNinjaClient.GetGeocoding(dto.ApiNinjasGeocodingRequestDto{
 		City:    request.City,
 		State:   request.State,
@@ -101,8 +98,9 @@ func (p *LocationProviderImpl) getAddressHashByCoordsFromNinjaApi(coords *dto.Co
 	country := (*r)[0]
 
 	addressString := country.Country + country.State + country.Name
-	p.hasher.Write([]byte(addressString))
-	return hex.EncodeToString(p.hasher.Sum(nil)), nil
+	hash := md5.Sum([]byte(addressString))
+
+	return hex.EncodeToString(hash[:]), nil
 }
 
 func (p *LocationProviderImpl) storeAddressHash(ctx context.Context, coords *dto.Coords, addressHash string) {

@@ -26,7 +26,7 @@ func NewLocationService(logger log.Logger, locationStorage storage.LocationStora
 }
 
 func (s *LocationServiceImpl) FindGeocoding(ctx context.Context, request *dto.GeocodingRequest) (*[]*dto.Geocoding, error) {
-	return s.FindGeocoding(ctx, request)
+	return s.locationProvider.FindGeocoding(ctx, request)
 }
 
 func (s *LocationServiceImpl) LocationByCoords(ctx context.Context, coords *dto.Coords) (*dto.LocationInfo, error) {

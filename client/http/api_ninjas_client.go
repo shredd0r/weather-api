@@ -59,11 +59,21 @@ func (c *ApiNinjasClient) GetReversGeocoding(request dto.ApiNinjasReverseGeocodi
 }
 
 func (c *ApiNinjasClient) getQueryParams(request dto.ApiNinjasGeocodingRequestDto) string {
-	return url.Values{
-		"city":    {request.City},
-		"state":   {request.State},
-		"country": {request.Country},
-	}.Encode()
+	values := url.Values{}
+
+	if request.City != nil {
+		values.Add("city", *request.City)
+	}
+
+	if request.State != nil {
+		values.Add("state", *request.State)
+	}
+
+	if request.Country != nil {
+		values.Add("country", *request.Country)
+	}
+
+	return values.Encode()
 }
 
 func (c *ApiNinjasClient) getQueryParamsForReverse(request dto.ApiNinjasReverseGeocodingRequestDto) string {

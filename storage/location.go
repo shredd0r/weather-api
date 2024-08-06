@@ -42,17 +42,17 @@ func (r RedisLocationStorage) SaveLocation(ctx context.Context, location dto.Loc
 }
 
 func (r RedisLocationStorage) AddCoords(ctx context.Context, coords *dto.Coords, addressHash string) error {
-	r.logger.Debugf("try add new coords to redis cache, coords: %s, addressHash:%s", *coords, addressHash)
+	r.logger.Debugf("try add new coords to redis cache, coords: %s, addressHash: %s", coords, addressHash)
 	return r.client.HSet(ctx, keyCoords, r.getStrCoords(coords), addressHash)
 }
 
 func (r RedisLocationStorage) RemoveCoords(ctx context.Context, coords *dto.Coords) error {
-	r.logger.Debugf("try delete coords from redis cache, coords: %s", *coords)
+	r.logger.Debugf("try delete coords from redis cache, coords: %s", coords)
 	return r.client.HDel(ctx, keyLastTimeUseCoords, r.getStrCoords(coords))
 }
 
 func (r RedisLocationStorage) UpdateLastTimeUseCoords(ctx context.Context, coords *dto.Coords, lastTime int64) error {
-	r.logger.Debugf("try update last time use coords in redis cache, coords: %s, lastTime: %d", *coords, lastTime)
+	r.logger.Debugf("try update last time use coords in redis cache, coords: %s, lastTime: %d", coords, lastTime)
 	return r.client.HSet(ctx, keyLastTimeUseCoords, r.getStrCoords(coords), lastTime)
 }
 

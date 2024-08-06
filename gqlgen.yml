@@ -83,21 +83,9 @@ models:
   WeatherForecaster:
     model:
       - github.com/shredd0r/weather-api/dto.WeatherForecaster
+  PrecipitationType:
+    model:
+      - github.com/shredd0r/weather-api/dto.PrecipitationType
   Unit:
     model:
       - github.com/shredd0r/weather-api/dto.Unit
-  CurrentWeather:
-    model:
-      - github.com/shredd0r/weather-api/graph/marshals.CurrentWeather
-  HourlyWeather:
-    model:
-      - github.com/shredd0r/weather-api/graph/marshals.HourlyWeather
-  DailyWeather:
-    model:
-      - github.com/shredd0r/weather-api/graph/marshals.DailyWeather
-  GeocodingRequest:
-    model:
-      - github.com/shredd0r/weather-api/graph/marshals.GeocodingRequest
-  Geocoding:
-    model:
-      - github.com/shredd0r/weather-api/graph/marshals.Geocoding

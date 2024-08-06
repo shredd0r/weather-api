@@ -30,7 +30,7 @@ type HourlyWeather struct {
 	EpochTime                  int64             `json:"epochTime"`
 	CurrentTemperature         *float64          `json:"currentTemperature"`
 	FeelsLikeTemperature       *float64          `json:"feelsLikeTemperature"`
-	UVIndex                    *uint8            `json:"uvIndex"`
+	UVIndex                    *float64          `json:"uvIndex"`
 	ProbabilityOfPrecipitation *float64          `json:"probabilityOfPrecipitation"`
 	PrecipitationType          PrecipitationType `json:"precipitationType"`
 	AmountOfPrecipitation      *float64          `json:"amountOfPrecipitation"`
@@ -74,6 +74,10 @@ type Coords struct {
 	Longitude float64 `json:"longitude"`
 }
 
+func (w *Coords) String() string {
+	return getJSONStr(w)
+}
+
 func NewCoords(strCoords string) Coords {
 	coords := strings.Split(strCoords, ",")
 	if len(coords) != 2 {
@@ -98,9 +102,9 @@ type LocationInfo struct {
 }
 
 type GeocodingRequest struct {
-	City    string
-	State   string
-	Country string
+	City    *string
+	State   *string
+	Country *string
 }
 
 type Geocoding struct {

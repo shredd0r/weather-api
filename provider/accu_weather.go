@@ -81,7 +81,7 @@ func (p AccuWeatherProvider) mapHourlyResponse(responseDto *dto.AccuWeatherHourl
 	return &dto.HourlyWeather{
 		CurrentTemperature:         responseDto.Temperature.Value,
 		FeelsLikeTemperature:       responseDto.RealFeelTemperature.Value,
-		UVIndex:                    responseDto.UVIndex,
+		UVIndex:                    util.PercentToFloat64Pointer(responseDto.UVIndex),
 		EpochTime:                  responseDto.EpochTime,
 		ProbabilityOfPrecipitation: probabilityOfPrecipitation,
 		PrecipitationType:          responseDto.PrecipitationType,

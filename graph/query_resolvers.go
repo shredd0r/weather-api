@@ -6,12 +6,12 @@ package graph
 
 import (
 	"context"
-	"github.com/shredd0r/weather-api/dto"
+
 	"github.com/shredd0r/weather-api/graph/model"
 )
 
 // FindGeocoding is the resolver for the findGeocoding field.
-func (r *queryResolver) FindGeocoding(ctx context.Context, input *dto.GeocodingRequest) ([]*dto.Geocoding, error) {
+func (r *queryResolver) FindGeocoding(ctx context.Context, input *model.GeocodingRequest) ([]*model.Geocoding, error) {
 	resp, err := r.GraphqlApi.FindGeocoding(ctx, input)
 
 	if err != nil {
@@ -22,12 +22,12 @@ func (r *queryResolver) FindGeocoding(ctx context.Context, input *dto.GeocodingR
 }
 
 // CurrentWeather is the resolver for the currentWeather field.
-func (r *queryResolver) CurrentWeather(ctx context.Context, input *model.WeatherRequest) (*dto.CurrentWeather, error) {
+func (r *queryResolver) CurrentWeather(ctx context.Context, input *model.WeatherRequest) (*model.CurrentWeather, error) {
 	return r.GraphqlApi.CurrentWeather(ctx, input)
 }
 
 // HourlyWeather is the resolver for the hourlyWeather field.
-func (r *queryResolver) HourlyWeather(ctx context.Context, input *model.WeatherRequest) ([]*dto.HourlyWeather, error) {
+func (r *queryResolver) HourlyWeather(ctx context.Context, input *model.WeatherRequest) ([]*model.HourlyWeather, error) {
 	resp, err := r.GraphqlApi.HourlyWeather(ctx, input)
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (r *queryResolver) HourlyWeather(ctx context.Context, input *model.WeatherR
 }
 
 // DailyWeather is the resolver for the dailyWeather field.
-func (r *queryResolver) DailyWeather(ctx context.Context, input *model.WeatherRequest) ([]*dto.DailyWeather, error) {
+func (r *queryResolver) DailyWeather(ctx context.Context, input *model.WeatherRequest) ([]*model.DailyWeather, error) {
 	resp, err := r.GraphqlApi.DailyWeather(ctx, input)
 
 	if err != nil {

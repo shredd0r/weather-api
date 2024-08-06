@@ -17,6 +17,6 @@ FROM alpine
 
 WORKDIR /app
 
-COPY --from=builder /app/weather-api /app/weather-api
+COPY --from=run-test-stage /app/weather-api /app/weather-api
 
 CMD ["./weather-api"]
