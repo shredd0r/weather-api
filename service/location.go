@@ -1,3 +1,4 @@
+//go:generate mockgen -source=location.go -destination=mock/location.go
 package service
 
 import (

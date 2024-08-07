@@ -1,3 +1,5 @@
+//go:generate mockgen -source=provider.go -destination=mock/provider.go
+
 package provider
 
 import (

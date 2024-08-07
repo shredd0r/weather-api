@@ -8,6 +8,7 @@ RUN go mod download
 
 COPY . .
 
+RUN go generate -v ./...
 RUN go build -o /app/weather-api
 
 FROM builder AS run-test-stage
