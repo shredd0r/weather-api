@@ -9,8 +9,6 @@ import (
 )
 
 var (
-	ErrInvalidLocale     = errors.New("invalid locale")
-	ErrInvalidMetric     = errors.New("invalid metric")
 	ErrInvalidCoords     = errors.New("invalid coords")
 	ErrCountRequestIsOut = errors.New("count of request to api out")
 )

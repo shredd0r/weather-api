@@ -11,6 +11,12 @@ import (
 	"time"
 )
 
+var (
+	ErrEmptyCoords   = errors.New("coords is empty")
+	ErrEmptyLocale   = errors.New("locale is empty")
+	ErrInvalidCoords = errors.New("invalid coords latitude range is [-90, 90], longitude range is [-180, 180)")
+)
+
 type WeatherService interface {
 	CurrentWeather(ctx context.Context, request *dto.WeatherRequest) (*dto.CurrentWeather, error)
 	HourlyWeather(ctx context.Context, request *dto.WeatherRequest) (*[]*dto.HourlyWeather, error)
@@ -97,6 +103,11 @@ func workflowGetWeatherFromProviderOrStorage[T any](
 	methodForSaveUpdatedTime func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, lastTime int64) error,
 	methodForSaveWeather func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather T) error) (*T, error) {
 
+	ok, err := validateRequest(request)
+	if !ok {
+		return nil, err
+	}
+
 	wg := &sync.WaitGroup{}
 	r, err := methodForGetWeatherProviderRequest(ctx, request)
 	if err != nil {
@@ -138,4 +149,35 @@ func workflowGetWeatherFromProviderOrStorage[T any](
 
 	wg.Wait()
 	return weather, nil
+}
+
+func validateRequest(request *dto.WeatherRequest) (bool, error) {
+	ok, err := coordsIsCorrect(request)
+	if !ok {
+		return false, err
+	}
+
+	if request.Locale == "" {
+		return false, ErrEmptyLocale
+	}
+
+	return true, nil
+}
+
+func coordsIsCorrect(request *dto.WeatherRequest) (bool, error) {
+	if request.Coords != nil {
+		if latitudeIsCorrect(request.Coords) && longitudeIsCorrect(request.Coords) {
+			return true, nil
+		}
+		return false, ErrInvalidCoords
+	}
+	return false, ErrEmptyCoords
+}
+
+func latitudeIsCorrect(coords *dto.Coords) bool {
+	return coords.Latitude <= 90 || coords.Latitude >= -90
+}
+
+func longitudeIsCorrect(coords *dto.Coords) bool {
+	return coords.Longitude < 180 || coords.Longitude >= -180
 }
