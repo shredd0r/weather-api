@@ -3,12 +3,13 @@ package service
 import (
 	"context"
 	"errors"
+	"sync"
+	"time"
+
 	"github.com/shredd0r/weather-api/dto"
 	"github.com/shredd0r/weather-api/log"
 	"github.com/shredd0r/weather-api/provider"
 	"github.com/shredd0r/weather-api/storage"
-	"sync"
-	"time"
 )
 
 var (
@@ -101,7 +102,7 @@ func workflowGetWeatherFromProviderOrStorage[T any](
 	methodForGetFromStorage func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster) (*T, error),
 	methodForGetFromProvider func(ctx context.Context, request *dto.WeatherRequestProvider) (*T, error),
 	methodForSaveUpdatedTime func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, lastTime int64) error,
-	methodForSaveWeather func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather T) error) (*T, error) {
+	methodForSaveWeather func(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *T) error) (*T, error) {
 
 	ok, err := validateRequest(request)
 	if !ok {
@@ -127,7 +128,7 @@ func workflowGetWeatherFromProviderOrStorage[T any](
 				defer wg.Done()
 
 				logger.Info("start save new weather info")
-				err := methodForSaveWeather(ctx, r.Location.AddressHash, forecaster, *weather)
+				err := methodForSaveWeather(ctx, r.Location.AddressHash, forecaster, weather)
 				if err != nil {
 					logger.Errorf("error when try save daily weather, error: %s", err.Error())
 				}
@@ -175,9 +176,9 @@ func coordsIsCorrect(request *dto.WeatherRequest) (bool, error) {
 }
 
 func latitudeIsCorrect(coords *dto.Coords) bool {
-	return coords.Latitude <= 90 || coords.Latitude >= -90
+	return coords.Latitude <= 90 && coords.Latitude >= -90
 }
 
 func longitudeIsCorrect(coords *dto.Coords) bool {
-	return coords.Longitude < 180 || coords.Longitude >= -180
+	return coords.Longitude < 180 && coords.Longitude >= -180
 }

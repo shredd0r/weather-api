@@ -5,12 +5,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"sync"
+	"time"
+
 	"github.com/shredd0r/weather-api/client/http"
 	"github.com/shredd0r/weather-api/dto"
 	"github.com/shredd0r/weather-api/log"
 	"github.com/shredd0r/weather-api/storage"
-	"sync"
-	"time"
 )
 
 type LocationProviderImpl struct {
@@ -147,7 +148,7 @@ func (p *LocationProviderImpl) storeNewLocation(ctx context.Context, location *d
 	p.logger.Info("start store new location")
 
 	go func() {
-		err := p.locationStorage.SaveLocation(ctx, *location, addressHash)
+		err := p.locationStorage.SaveLocation(ctx, location, addressHash)
 		if err != nil {
 			p.logger.Errorf("error when try save new location, error: %s", err.Error())
 		}

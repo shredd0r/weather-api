@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	redis2 "github.com/redis/go-redis/v9"
 	"github.com/shredd0r/weather-api/client/redis"
 	"github.com/shredd0r/weather-api/dto"
@@ -36,7 +37,7 @@ func (r RedisLocationStorage) GetLocation(ctx context.Context, addressHash strin
 	return locationDto, err
 }
 
-func (r RedisLocationStorage) SaveLocation(ctx context.Context, location dto.Location, addressHash string) error {
+func (r RedisLocationStorage) SaveLocation(ctx context.Context, location *dto.Location, addressHash string) error {
 	r.logger.Debug("try save new location to redis cache")
 	return setObjWithInnerFieldToRedis(ctx, r.client, keyLocation, addressHash, location)
 }

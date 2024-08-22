@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	redis2 "github.com/redis/go-redis/v9"
 	"github.com/shredd0r/weather-api/client/redis"
 	"github.com/shredd0r/weather-api/dto"
@@ -32,17 +33,17 @@ func NewRedisWeatherStorage(logger log.Logger, client redis.Client) WeatherStora
 	}
 }
 
-func (r RedisWeatherStorage) SaveCurrentWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather dto.CurrentWeather) error {
+func (r RedisWeatherStorage) SaveCurrentWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *dto.CurrentWeather) error {
 	r.logger.Debugf("try save current weather to redis cache for forecaster: %s", forecaster)
 	return setObjWithInnerFieldToRedis(ctx, r.client, r.getKey(keyForCurrentWeatherFormat, forecaster), addressHash, weather)
 }
 
-func (r RedisWeatherStorage) SaveHourlyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather []*dto.HourlyWeather) error {
+func (r RedisWeatherStorage) SaveHourlyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *[]*dto.HourlyWeather) error {
 	r.logger.Debugf("try save hourly weather to redis cache for forecaster: %s", forecaster)
 	return setObjWithInnerFieldToRedis(ctx, r.client, r.getKey(keyForHourlyWeatherFormat, forecaster), addressHash, weather)
 }
 
-func (r RedisWeatherStorage) SaveDailyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather []*dto.DailyWeather) error {
+func (r RedisWeatherStorage) SaveDailyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *[]*dto.DailyWeather) error {
 	r.logger.Debugf("try save daily weather to redis cache for forecaster: %s", forecaster)
 	return setObjWithInnerFieldToRedis(ctx, r.client, r.getKey(keyForDailyWeatherFormat, forecaster), addressHash, weather)
 }

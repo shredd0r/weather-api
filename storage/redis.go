@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	goredis "github.com/redis/go-redis/v9"
 	"github.com/shredd0r/weather-api/client/redis"
 	"github.com/shredd0r/weather-api/util"
 )
 
-func setObjWithInnerFieldToRedis[T any](ctx context.Context, client redis.Client, key string, innerField string, value T) error {
+func setObjWithInnerFieldToRedis[T any](ctx context.Context, client redis.Client, key string, innerField string, value *T) error {
 	bytes, err := json.Marshal(value)
 	if err != nil {
 		return err

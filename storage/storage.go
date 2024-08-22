@@ -4,6 +4,7 @@ package storage
 import (
 	"context"
 	"errors"
+
 	"github.com/shredd0r/weather-api/dto"
 )
 
@@ -12,9 +13,9 @@ var (
 )
 
 type WeatherStorage interface {
-	SaveCurrentWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather dto.CurrentWeather) error
-	SaveHourlyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather []*dto.HourlyWeather) error
-	SaveDailyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather []*dto.DailyWeather) error
+	SaveCurrentWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *dto.CurrentWeather) error
+	SaveHourlyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *[]*dto.HourlyWeather) error
+	SaveDailyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *[]*dto.DailyWeather) error
 
 	GetCurrentWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster) (*dto.CurrentWeather, error)
 	GetHourlyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster) (*[]*dto.HourlyWeather, error)
@@ -39,7 +40,7 @@ type WeatherStorage interface {
 
 type LocationStorage interface {
 	GetLocation(ctx context.Context, addressHash string) (*dto.Location, error)
-	SaveLocation(ctx context.Context, location dto.Location, addressHash string) error
+	SaveLocation(ctx context.Context, location *dto.Location, addressHash string) error
 
 	AddCoords(ctx context.Context, coords *dto.Coords, addressHash string) error
 	RemoveCoords(ctx context.Context, coords *dto.Coords) error

@@ -215,7 +215,7 @@ func (mr *MockWeatherStorageMockRecorder) RemoveLastTimeUpdatedHourlyWeather(ctx
 }
 
 // SaveCurrentWeather mocks base method.
-func (m *MockWeatherStorage) SaveCurrentWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather dto.CurrentWeather) error {
+func (m *MockWeatherStorage) SaveCurrentWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *dto.CurrentWeather) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveCurrentWeather", ctx, addressHash, forecaster, weather)
 	ret0, _ := ret[0].(error)
@@ -229,7 +229,7 @@ func (mr *MockWeatherStorageMockRecorder) SaveCurrentWeather(ctx, addressHash, f
 }
 
 // SaveDailyWeather mocks base method.
-func (m *MockWeatherStorage) SaveDailyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather []*dto.DailyWeather) error {
+func (m *MockWeatherStorage) SaveDailyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *[]*dto.DailyWeather) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveDailyWeather", ctx, addressHash, forecaster, weather)
 	ret0, _ := ret[0].(error)
@@ -243,7 +243,7 @@ func (mr *MockWeatherStorageMockRecorder) SaveDailyWeather(ctx, addressHash, for
 }
 
 // SaveHourlyWeather mocks base method.
-func (m *MockWeatherStorage) SaveHourlyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather []*dto.HourlyWeather) error {
+func (m *MockWeatherStorage) SaveHourlyWeather(ctx context.Context, addressHash string, forecaster dto.WeatherForecaster, weather *[]*dto.HourlyWeather) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveHourlyWeather", ctx, addressHash, forecaster, weather)
 	ret0, _ := ret[0].(error)

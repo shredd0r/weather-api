@@ -3,6 +3,9 @@ package test
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/shredd0r/weather-api/client/http"
 	"github.com/shredd0r/weather-api/config"
 	"github.com/shredd0r/weather-api/dto"
@@ -14,8 +17,6 @@ import (
 	mock_storage "github.com/shredd0r/weather-api/storage/mock"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
-	"testing"
-	"time"
 )
 
 func TestForCurrentWeather(t *testing.T) {
@@ -188,11 +189,11 @@ func testWeatherNotFoundInStorage(
 	ctx := context.Background()
 	req := getRequest()
 	locationInfo := getLocationInfo()
-	locationService.EXPECT().LocationByCoords(ctx, req.Coords).Return(locationInfo, nil).Times(1)
-	expectMethodForGetWeatherFromStorage(ctx, locationInfo.AddressHash, forecaster).Return(nil, storage.ErrNotFound).Times(1)
-	expectMethodForGetWeatherFromProvider(ctx, gomock.Any()).Return(returnedWeatherFromProvider, nil).Times(1)
-	expectMethodForSaveWeather(ctx, locationInfo.AddressHash, forecaster, returnedWeatherFromProvider).Times(1)
-	expectMethodForSaveUpdatedTimeWeather(ctx, locationInfo.AddressHash, forecaster, gomock.Not(0)).Times(1)
+	locationService.EXPECT().LocationByCoords(gomock.Any(), req.Coords).Return(locationInfo, nil).Times(1)
+	expectMethodForGetWeatherFromStorage(gomock.Any(), locationInfo.AddressHash, forecaster).Return(nil, storage.ErrNotFound).Times(1)
+	expectMethodForGetWeatherFromProvider(gomock.Any(), gomock.Any()).Return(returnedWeatherFromProvider, nil).Times(1)
+	expectMethodForSaveWeather(gomock.Any(), locationInfo.AddressHash, forecaster, returnedWeatherFromProvider).Times(1)
+	expectMethodForSaveUpdatedTimeWeather(gomock.Any(), locationInfo.AddressHash, forecaster, gomock.Not(0)).Times(1)
 
 	resp, err := testedMethodGetWeatherFromService(ctx, req)
 
@@ -214,16 +215,16 @@ func testWeatherInStorage(
 	ctx := context.Background()
 	req := getRequest()
 	locationInfo := getLocationInfo()
-	locationService.EXPECT().LocationByCoords(ctx, req.Coords).Return(locationInfo, nil).Times(1)
-	expectMethodForGetWeatherFromStorage(ctx, locationInfo.AddressHash, forecaster).Return(returnedWeatherDto, nil).Times(1)
-	expectMethodForGetWeatherFromProvider(ctx, gomock.Any()).Times(0)
-	expectMethodForSaveWeather(ctx, locationInfo.AddressHash, forecaster, returnedWeatherDto).Times(0)
-	expectMethodForSaveUpdatedTimeWeather(ctx, locationInfo.AddressHash, forecaster, gomock.Not(0)).Times(0)
+	locationService.EXPECT().LocationByCoords(gomock.Any(), req.Coords).Return(locationInfo, nil).Times(1)
+	expectMethodForGetWeatherFromStorage(gomock.Any(), locationInfo.AddressHash, forecaster).Return(returnedWeatherDto, nil).Times(1)
+	expectMethodForGetWeatherFromProvider(gomock.Any(), gomock.Any()).Times(0)
+	expectMethodForSaveWeather(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+	expectMethodForSaveUpdatedTimeWeather(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(0)).Times(0)
 
 	resp, err := testedMethodGetWeatherFromService(ctx, req)
 
 	assert.Nil(t, err)
-	assert.Equal(t, returnedWeatherDto, resp)
+	assert.EqualValues(t, returnedWeatherDto, resp)
 }
 
 func testWeatherProviderForecasterReturnError(
@@ -240,11 +241,11 @@ func testWeatherProviderForecasterReturnError(
 	ctx := context.Background()
 	req := getRequest()
 	locationInfo := getLocationInfo()
-	locationService.EXPECT().LocationByCoords(ctx, req.Coords).Return(locationInfo, nil).Times(1)
-	expectMethodForGetWeatherFromStorage(ctx, locationInfo.AddressHash, forecaster).Return(nil, storage.ErrNotFound).Times(1)
-	expectMethodForGetWeatherFromProvider(ctx, gomock.Any()).Return(nil, expectedErr).Times(1)
-	expectMethodForSaveWeather(ctx, locationInfo.AddressHash, forecaster, gomock.Any()).Times(0)
-	expectMethodForSaveUpdatedTimeWeather(ctx, locationInfo.AddressHash, forecaster, gomock.Nil()).Times(0)
+	locationService.EXPECT().LocationByCoords(gomock.Any(), req.Coords).Return(locationInfo, nil).Times(1)
+	expectMethodForGetWeatherFromStorage(gomock.Any(), locationInfo.AddressHash, forecaster).Return(nil, storage.ErrNotFound).Times(1)
+	expectMethodForGetWeatherFromProvider(gomock.Any(), gomock.Any()).Return(nil, expectedErr).Times(1)
+	expectMethodForSaveWeather(gomock.Any(), locationInfo.AddressHash, forecaster, gomock.Any()).Times(0)
+	expectMethodForSaveUpdatedTimeWeather(gomock.Any(), locationInfo.AddressHash, forecaster, gomock.Nil()).Times(0)
 
 	resp, err := testedMethodGetWeatherFromService(ctx, req)
 
@@ -263,9 +264,14 @@ func testInvalidCoords(
 	forecaster dto.WeatherForecaster) {
 
 	expectedErr := service.ErrInvalidCoords
-	req := getRequest()
-	req.Coords.Latitude = -99
-	req.Coords.Longitude = 180
+	req := &dto.WeatherRequest{
+		Coords: &dto.Coords{
+			Latitude:  -99,
+			Longitude: 180,
+		},
+		Locale: "us",
+		Unit:   dto.UnitImperial,
+	}
 
 	testInvalidRequest(
 		t,
@@ -351,8 +357,8 @@ func testInvalidRequest(
 	locationService.EXPECT().LocationByCoords(gomock.Any(), req.Coords).Times(0)
 	expectMethodForGetWeatherFromStorage(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 	expectMethodForGetWeatherFromProvider(gomock.Any(), gomock.Any()).Times(0)
-	expectMethodForSaveWeather(ctx, gomock.Any(), forecaster, gomock.Any()).Times(0)
-	expectMethodForSaveUpdatedTimeWeather(ctx, gomock.Any(), forecaster, gomock.Nil()).Times(0)
+	expectMethodForSaveWeather(gomock.Any(), gomock.Any(), forecaster, gomock.Any()).Times(0)
+	expectMethodForSaveUpdatedTimeWeather(gomock.Any(), gomock.Any(), forecaster, gomock.Nil()).Times(0)
 
 	resp, err := testedMethodGetWeatherFromService(ctx, req)
 
@@ -381,10 +387,7 @@ func getForecasterList() []dto.WeatherForecaster {
 
 func getRequest() *dto.WeatherRequest {
 	return &dto.WeatherRequest{
-		Coords: &dto.Coords{
-			Latitude:  9.11,
-			Longitude: 9.11,
-		},
+		Coords: getCoords(),
 		Locale: "us",
 		Unit:   dto.UnitImperial,
 	}
@@ -392,11 +395,15 @@ func getRequest() *dto.WeatherRequest {
 
 func getLocationInfo() *dto.LocationInfo {
 	return &dto.LocationInfo{
-		Coords: dto.Coords{
-			Latitude:  9.11,
-			Longitude: 9.11,
-		},
+		Coords:                 *getCoords(),
 		AddressHash:            "123321",
 		AccuWeatherLocationKey: "123",
+	}
+}
+
+func getCoords() *dto.Coords {
+	return &dto.Coords{
+		Latitude:  9.11,
+		Longitude: 9.11,
 	}
 }
