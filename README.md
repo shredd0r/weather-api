@@ -7,7 +7,8 @@
 This app get weather from open source and store the information about weather to cache.
 Api realized by Graphql.
 
-There are 3 api`s:
+There are 4 api`s:
+- findGeocoding
 - currentWeather 
 - hourlyWeather 
 - dailyWeather
@@ -30,7 +31,7 @@ query {
         minTemperature
         maxTemperature
         feelsLikeTemperature
-        iconResource
+        iconId
         mobileLink
         link
     }
@@ -61,6 +62,4 @@ query {
 3. run command in app directory: ``docker-compose up -d``
 
 ### Features
-- add iconResource for all weather events
-- api for get coords by city name + state
 - add another forecaster
