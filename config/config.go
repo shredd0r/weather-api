@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/caarlos0/env/v10"
 	"time"
+
+	"github.com/caarlos0/env/v10"
 )
 
 type Config struct {
@@ -29,7 +30,7 @@ type Logger struct {
 type ExpirationDuration struct {
 	WeatherInfo time.Duration `env:"WEATHER_INFO" envDefault:"3h"`
 	Coords      time.Duration `env:"COORDS" envDefault:"3h"`
-	Period      time.Duration `env:"PERIOD" envDefault:"5m"`
+	TaskPeriod  time.Duration `env:"TASK_PERIOD" envDefault:"1m"`
 }
 
 type ApiKeys struct {

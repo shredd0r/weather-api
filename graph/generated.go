@@ -51,7 +51,7 @@ type ComplexityRoot struct {
 		CurrentTemperature   func(childComplexity int) int
 		EpochTime            func(childComplexity int) int
 		FeelsLikeTemperature func(childComplexity int) int
-		IconResource         func(childComplexity int) int
+		IconID               func(childComplexity int) int
 		Link                 func(childComplexity int) int
 		MaxTemperature       func(childComplexity int) int
 		MinTemperature       func(childComplexity int) int
@@ -62,7 +62,7 @@ type ComplexityRoot struct {
 	DailyWeather struct {
 		EpochTime                  func(childComplexity int) int
 		Humidity                   func(childComplexity int) int
-		IconResource               func(childComplexity int) int
+		IconID                     func(childComplexity int) int
 		Link                       func(childComplexity int) int
 		MaxTemperature             func(childComplexity int) int
 		MinTemperature             func(childComplexity int) int
@@ -88,7 +88,7 @@ type ComplexityRoot struct {
 		CurrentTemperature         func(childComplexity int) int
 		EpochTime                  func(childComplexity int) int
 		FeelsLikeTemperature       func(childComplexity int) int
-		IconResource               func(childComplexity int) int
+		IconID                     func(childComplexity int) int
 		Link                       func(childComplexity int) int
 		MobileLink                 func(childComplexity int) int
 		PrecipitationType          func(childComplexity int) int
@@ -157,12 +157,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CurrentWeather.FeelsLikeTemperature(childComplexity), true
 
-	case "CurrentWeather.iconResource":
-		if e.complexity.CurrentWeather.IconResource == nil {
+	case "CurrentWeather.iconId":
+		if e.complexity.CurrentWeather.IconID == nil {
 			break
 		}
 
-		return e.complexity.CurrentWeather.IconResource(childComplexity), true
+		return e.complexity.CurrentWeather.IconID(childComplexity), true
 
 	case "CurrentWeather.link":
 		if e.complexity.CurrentWeather.Link == nil {
@@ -213,12 +213,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DailyWeather.Humidity(childComplexity), true
 
-	case "DailyWeather.iconResource":
-		if e.complexity.DailyWeather.IconResource == nil {
+	case "DailyWeather.iconId":
+		if e.complexity.DailyWeather.IconID == nil {
 			break
 		}
 
-		return e.complexity.DailyWeather.IconResource(childComplexity), true
+		return e.complexity.DailyWeather.IconID(childComplexity), true
 
 	case "DailyWeather.link":
 		if e.complexity.DailyWeather.Link == nil {
@@ -353,12 +353,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HourlyWeather.FeelsLikeTemperature(childComplexity), true
 
-	case "HourlyWeather.iconResource":
-		if e.complexity.HourlyWeather.IconResource == nil {
+	case "HourlyWeather.iconId":
+		if e.complexity.HourlyWeather.IconID == nil {
 			break
 		}
 
-		return e.complexity.HourlyWeather.IconResource(childComplexity), true
+		return e.complexity.HourlyWeather.IconID(childComplexity), true
 
 	case "HourlyWeather.link":
 		if e.complexity.HourlyWeather.Link == nil {
@@ -938,8 +938,8 @@ func (ec *executionContext) fieldContext_CurrentWeather_feelsLikeTemperature(ctx
 	return fc, nil
 }
 
-func (ec *executionContext) _CurrentWeather_iconResource(ctx context.Context, field graphql.CollectedField, obj *model.CurrentWeather) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CurrentWeather_iconResource(ctx, field)
+func (ec *executionContext) _CurrentWeather_iconId(ctx context.Context, field graphql.CollectedField, obj *model.CurrentWeather) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CurrentWeather_iconId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -952,7 +952,7 @@ func (ec *executionContext) _CurrentWeather_iconResource(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.IconResource, nil
+		return obj.IconID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -961,19 +961,19 @@ func (ec *executionContext) _CurrentWeather_iconResource(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*dto.IconId)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOIconId2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐIconId(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CurrentWeather_iconResource(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CurrentWeather_iconId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "CurrentWeather",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type IconId does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1498,8 +1498,8 @@ func (ec *executionContext) fieldContext_DailyWeather_precipitationType(ctx cont
 	return fc, nil
 }
 
-func (ec *executionContext) _DailyWeather_iconResource(ctx context.Context, field graphql.CollectedField, obj *model.DailyWeather) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DailyWeather_iconResource(ctx, field)
+func (ec *executionContext) _DailyWeather_iconId(ctx context.Context, field graphql.CollectedField, obj *model.DailyWeather) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DailyWeather_iconId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1512,7 +1512,7 @@ func (ec *executionContext) _DailyWeather_iconResource(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.IconResource, nil
+		return obj.IconID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1521,19 +1521,19 @@ func (ec *executionContext) _DailyWeather_iconResource(ctx context.Context, fiel
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*dto.IconId)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOIconId2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐIconId(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DailyWeather_iconResource(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DailyWeather_iconId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "DailyWeather",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type IconId does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2187,8 +2187,8 @@ func (ec *executionContext) fieldContext_HourlyWeather_wind(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _HourlyWeather_iconResource(ctx context.Context, field graphql.CollectedField, obj *model.HourlyWeather) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HourlyWeather_iconResource(ctx, field)
+func (ec *executionContext) _HourlyWeather_iconId(ctx context.Context, field graphql.CollectedField, obj *model.HourlyWeather) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HourlyWeather_iconId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2201,7 +2201,7 @@ func (ec *executionContext) _HourlyWeather_iconResource(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.IconResource, nil
+		return obj.IconID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2210,19 +2210,19 @@ func (ec *executionContext) _HourlyWeather_iconResource(ctx context.Context, fie
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*dto.IconId)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOIconId2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐIconId(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HourlyWeather_iconResource(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HourlyWeather_iconId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HourlyWeather",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type IconId does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2428,8 +2428,8 @@ func (ec *executionContext) fieldContext_Query_currentWeather(ctx context.Contex
 				return ec.fieldContext_CurrentWeather_maxTemperature(ctx, field)
 			case "feelsLikeTemperature":
 				return ec.fieldContext_CurrentWeather_feelsLikeTemperature(ctx, field)
-			case "iconResource":
-				return ec.fieldContext_CurrentWeather_iconResource(ctx, field)
+			case "iconId":
+				return ec.fieldContext_CurrentWeather_iconId(ctx, field)
 			case "mobileLink":
 				return ec.fieldContext_CurrentWeather_mobileLink(ctx, field)
 			case "link":
@@ -2504,8 +2504,8 @@ func (ec *executionContext) fieldContext_Query_hourlyWeather(ctx context.Context
 				return ec.fieldContext_HourlyWeather_amountOfPrecipitation(ctx, field)
 			case "wind":
 				return ec.fieldContext_HourlyWeather_wind(ctx, field)
-			case "iconResource":
-				return ec.fieldContext_HourlyWeather_iconResource(ctx, field)
+			case "iconId":
+				return ec.fieldContext_HourlyWeather_iconId(ctx, field)
 			case "mobileLink":
 				return ec.fieldContext_HourlyWeather_mobileLink(ctx, field)
 			case "link":
@@ -2584,8 +2584,8 @@ func (ec *executionContext) fieldContext_Query_dailyWeather(ctx context.Context,
 				return ec.fieldContext_DailyWeather_probabilityOfPrecipitation(ctx, field)
 			case "precipitationType":
 				return ec.fieldContext_DailyWeather_precipitationType(ctx, field)
-			case "iconResource":
-				return ec.fieldContext_DailyWeather_iconResource(ctx, field)
+			case "iconId":
+				return ec.fieldContext_DailyWeather_iconId(ctx, field)
 			case "mobileLink":
 				return ec.fieldContext_DailyWeather_mobileLink(ctx, field)
 			case "link":
@@ -4752,8 +4752,8 @@ func (ec *executionContext) _CurrentWeather(ctx context.Context, sel ast.Selecti
 			out.Values[i] = ec._CurrentWeather_maxTemperature(ctx, field, obj)
 		case "feelsLikeTemperature":
 			out.Values[i] = ec._CurrentWeather_feelsLikeTemperature(ctx, field, obj)
-		case "iconResource":
-			out.Values[i] = ec._CurrentWeather_iconResource(ctx, field, obj)
+		case "iconId":
+			out.Values[i] = ec._CurrentWeather_iconId(ctx, field, obj)
 		case "mobileLink":
 			out.Values[i] = ec._CurrentWeather_mobileLink(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4833,8 +4833,8 @@ func (ec *executionContext) _DailyWeather(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "iconResource":
-			out.Values[i] = ec._DailyWeather_iconResource(ctx, field, obj)
+		case "iconId":
+			out.Values[i] = ec._DailyWeather_iconId(ctx, field, obj)
 		case "mobileLink":
 			out.Values[i] = ec._DailyWeather_mobileLink(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4960,8 +4960,8 @@ func (ec *executionContext) _HourlyWeather(ctx context.Context, sel ast.Selectio
 			out.Values[i] = ec._HourlyWeather_amountOfPrecipitation(ctx, field, obj)
 		case "wind":
 			out.Values[i] = ec._HourlyWeather_wind(ctx, field, obj)
-		case "iconResource":
-			out.Values[i] = ec._HourlyWeather_iconResource(ctx, field, obj)
+		case "iconId":
+			out.Values[i] = ec._HourlyWeather_iconId(ctx, field, obj)
 		case "mobileLink":
 			out.Values[i] = ec._HourlyWeather_mobileLink(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6053,6 +6053,23 @@ func (ec *executionContext) marshalOHourlyWeather2ᚖgithubᚗcomᚋshredd0rᚋw
 		return graphql.Null
 	}
 	return ec._HourlyWeather(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOIconId2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐIconId(ctx context.Context, v interface{}) (*dto.IconId, error) {
+	if v == nil {
+		return nil, nil
+	}
+	tmp, err := graphql.UnmarshalString(v)
+	res := dto.IconId(tmp)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOIconId2ᚖgithubᚗcomᚋshredd0rᚋweatherᚑapiᚋdtoᚐIconId(ctx context.Context, sel ast.SelectionSet, v *dto.IconId) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalString(string(*v))
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

@@ -2,16 +2,12 @@ package provider
 
 import (
 	"context"
+
 	"github.com/shredd0r/weather-api/client/http"
 	"github.com/shredd0r/weather-api/dto"
 	"github.com/shredd0r/weather-api/log"
-	"github.com/shredd0r/weather-api/util"
+	"github.com/shredd0r/weather-api/mapper"
 )
-
-const countDays = 5
-const countWeatherInfoPerDay = 8
-
-var countWeatherInfo = countWeatherInfoPerDay * countDays
 
 type OpenWeatherProvider struct {
 	logger log.Logger
@@ -26,39 +22,33 @@ func NewOpenWeatherProvider(logger log.Logger, client http.OpenWeatherInterface)
 }
 
 func (p OpenWeatherProvider) CurrentWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*dto.CurrentWeather, error) {
-	resp, err := p.client.GetCurrentWeatherInfo(p.getRequest(request))
+	resp, err := p.client.GetCurrentWeatherInfo(mapper.OpenWeatherGetRequest(request))
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.CurrentWeather{
-		EpochTime:            resp.EpochTime,
-		Visibility:           util.PercentToFloat64Pointer(&resp.Visibility),
-		CurrentTemperature:   &resp.Main.Temperature,
-		FeelsLikeTemperature: &resp.Main.FeelsLike,
-		IconResource:         nil,
-	}, nil
+	return mapper.OpenWeatherMapCurrentWeather(resp), nil
 }
 
 func (p OpenWeatherProvider) HourlyWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*[]*dto.HourlyWeather, error) {
-	resp, err := p.client.GetForecastWeatherInfo(p.getForecastRequest(request))
+	resp, err := p.client.GetForecastWeatherInfo(mapper.OpenWeatherGetForecastRequest(request))
 
 	if err != nil {
 		return nil, err
 	}
 
-	return p.mapToHourlyWeathers(resp), nil
+	return mapper.OpenWeatherMapHourlyWeahters(resp), nil
 }
 
 func (p OpenWeatherProvider) DailyWeather(ctx context.Context, request *dto.WeatherRequestProvider) (*[]*dto.DailyWeather, error) {
-	resp, err := p.client.GetForecastWeatherInfo(p.getForecastRequest(request))
+	resp, err := p.client.GetForecastWeatherInfo(mapper.OpenWeatherGetForecastRequest(request))
 
 	if err != nil {
 		return nil, err
 	}
 
-	return p.mapToDailyWeathers(resp), nil
+	return mapper.OpenWeatherMapDailyWeahters(resp), nil
 }
 
 func (p OpenWeatherProvider) getUnits(unit dto.Unit) dto.OpenWeatherUnits {
@@ -71,103 +61,6 @@ func (p OpenWeatherProvider) getUnits(unit dto.Unit) dto.OpenWeatherUnits {
 		return dto.OpenWeatherUnitsStandard
 	}
 }
-
-func (p OpenWeatherProvider) mapToHourlyWeathers(response *dto.OpenWeatherHourlyWeatherResponseDto) *[]*dto.HourlyWeather {
-	lenArray := countWeatherInfoPerDay
-	hourlyWeathers := make([]*dto.HourlyWeather, lenArray)
-
-	for index := 0; index < lenArray; index++ {
-		hourlyWeathers[index] = p.mapOpenWeatherForecastInfoDtoToHourlyWeather(response.ListHourlyInfo[index])
-	}
-
-	return &hourlyWeathers
-}
-
-func (p OpenWeatherProvider) mapOpenWeatherForecastInfoDtoToHourlyWeather(weatherForecast dto.OpenWeatherForecastInfoDto) *dto.HourlyWeather {
-	precipitationType := p.getPrecipitationType(weatherForecast)
-
-	return &dto.HourlyWeather{
-		CurrentTemperature:         &weatherForecast.MainInfo.Temperature,
-		FeelsLikeTemperature:       &weatherForecast.MainInfo.FeelsLike,
-		UVIndex:                    nil,
-		EpochTime:                  weatherForecast.DateTimeForecast,
-		ProbabilityOfPrecipitation: &weatherForecast.ProbabilityOfPrecipitation,
-		PrecipitationType:          precipitationType,
-		AmountOfPrecipitation:      p.getAmountOfPrecipitation(precipitationType, weatherForecast),
-		Wind: &dto.Wind{
-			Speed:   &weatherForecast.WindInfo.Speed,
-			Degrees: weatherForecast.WindInfo.Degrees,
-		},
-		IconResource: &(*weatherForecast.WeatherInfos)[0].Icon,
-	}
-}
-
-func (p OpenWeatherProvider) mapToDailyWeathers(response *dto.OpenWeatherHourlyWeatherResponseDto) *[]*dto.DailyWeather {
-	lenArray := countDays
-	dailyWeathers := make([]*dto.DailyWeather, lenArray)
-
-	for index := 0; index < lenArray; index++ {
-		dailyWeathers[index] = p.mapOpenWeatherForecastInfoDtoToDailyWeather(response.ListHourlyInfo[index+countWeatherInfoPerDay])
-	}
-
-	return &dailyWeathers
-}
-
-func (p OpenWeatherProvider) mapOpenWeatherForecastInfoDtoToDailyWeather(weatherForecast dto.OpenWeatherForecastInfoDto) *dto.DailyWeather {
-	var minTemperature *float64
-	var maxTemperature *float64
-	precipitationType := p.getPrecipitationType(weatherForecast)
-
-	if weatherForecast.MainInfo.MinTemperature != 0 {
-		minTemperature = &weatherForecast.MainInfo.MinTemperature
-	}
-
-	if weatherForecast.MainInfo.MaxTemperature != 0 {
-		maxTemperature = &weatherForecast.MainInfo.MaxTemperature
-	}
-
-	return &dto.DailyWeather{
-		EpochTime:      weatherForecast.DateTimeForecast,
-		MinTemperature: minTemperature,
-		MaxTemperature: maxTemperature,
-		Humidity:       util.PercentToFloat64(weatherForecast.MainInfo.Humidity),
-		SunriseTime:    int64(weatherForecast.SystemInfo.Sunrise),
-		SunsetTime:     int64(weatherForecast.SystemInfo.Sunrise),
-		Wind: &dto.Wind{
-			Speed:   &weatherForecast.WindInfo.Speed,
-			Degrees: weatherForecast.WindInfo.Degrees,
-		},
-		ProbabilityOfPrecipitation: &weatherForecast.ProbabilityOfPrecipitation,
-		PrecipitationType:          precipitationType,
-		IconResource:               &(*weatherForecast.WeatherInfos)[0].Icon,
-	}
-}
-func (p OpenWeatherProvider) getPrecipitationType(weatherForecast dto.OpenWeatherForecastInfoDto) dto.PrecipitationType {
-	if weatherForecast.PrecipitationInfoForRain != nil {
-		return dto.PrecipitationTypeRain
-	}
-	if weatherForecast.PrecipitationInfoForSnow != nil {
-		return dto.PrecipitationTypeSnow
-	}
-
-	return dto.PrecipitationTypeEmpty
-}
-
-func (p OpenWeatherProvider) getAmountOfPrecipitation(precipitationType dto.PrecipitationType, weatherForecast dto.OpenWeatherForecastInfoDto) *float64 {
-	switch precipitationType {
-	case dto.PrecipitationTypeRain:
-		{
-			return weatherForecast.PrecipitationInfoForRain.VolumeLastThreeHour
-		}
-	case dto.PrecipitationTypeSnow:
-		{
-			return weatherForecast.PrecipitationInfoForSnow.VolumeLastThreeHour
-		}
-	default:
-		return nil
-	}
-}
-
 func (p OpenWeatherProvider) getForecastRequest(request *dto.WeatherRequestProvider) dto.OpenWeatherForecastRequestDto {
 	return dto.OpenWeatherForecastRequestDto{
 		OpenWeatherRequestDto: p.getRequest(request),

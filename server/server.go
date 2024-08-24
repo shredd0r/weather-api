@@ -3,6 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
+	http2 "net/http"
+	"sync"
+	"time"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/shredd0r/weather-api/client/http"
@@ -16,9 +20,6 @@ import (
 	"github.com/shredd0r/weather-api/service"
 	"github.com/shredd0r/weather-api/storage"
 	"github.com/shredd0r/weather-api/task"
-	http2 "net/http"
-	"sync"
-	"time"
 )
 
 type Server struct {
@@ -81,7 +82,7 @@ func (s *Server) workflowForTask(ctx context.Context) {
 	wgForTasks := &sync.WaitGroup{}
 
 	for {
-		time.Sleep(s.cfg.ExpirationDuration.Period)
+		time.Sleep(s.cfg.ExpirationDuration.TaskPeriod)
 
 		for _, cleaner := range s.listCleanerTasks {
 			s.runTask(ctx, cleaner, wgForTasks)

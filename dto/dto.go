@@ -2,8 +2,28 @@ package dto
 
 import (
 	"encoding/json"
-	"github.com/shredd0r/weather-api/util"
 	"strings"
+
+	"github.com/shredd0r/weather-api/util"
+)
+
+type IconId string
+
+const (
+	IconIdUndefined   = "0"
+	IconIdClearDay    = "1"
+	IconIdClearNight  = "2"
+	IconIdCloudyDay   = "3"
+	IconIdCloudyNight = "4"
+	IconIdCloudy      = "5"
+	IconIdRainyDay    = "6"
+	IconIdRainyNight  = "7"
+	IconIdRainy       = "8"
+	IconIdSnowyDay    = "9"
+	IconIdSnowyNight  = "10"
+	IconIdSnowy       = "11"
+	IconIdThunder     = "12"
+	IconIdMist        = "13"
 )
 
 type Error struct {
@@ -15,11 +35,11 @@ type CurrentWeather struct {
 	Visibility           *float64 `json:"visibility"`
 	CurrentTemperature   *float64 `json:"currentTemperature"`
 	MinTemperature       *float64 `json:"minTemperature"`
-	MaxTemperature       *float64 `json:"MaxTemperature"`
-	FeelsLikeTemperature *float64 `json:"FeelsLikeTemperature"`
-	IconResource         *string  `json:"iconResource"`
+	MaxTemperature       *float64 `json:"maxTemperature"`
+	FeelsLikeTemperature *float64 `json:"feelsLikeTemperature"`
+	IconId               *IconId  `json:"iconId"`
 	MobileLink           string   `json:"mobileLink"`
-	Link                 string   `json:"Link"`
+	Link                 string   `json:"link"`
 }
 
 func (w *CurrentWeather) String() string {
@@ -35,7 +55,7 @@ type HourlyWeather struct {
 	PrecipitationType          PrecipitationType `json:"precipitationType"`
 	AmountOfPrecipitation      *float64          `json:"amountOfPrecipitation"`
 	Wind                       *Wind             `json:"wind"`
-	IconResource               *string           `json:"iconResource"`
+	IconId                     *IconId           `json:"iconId"`
 	MobileLink                 string            `json:"mobileLink"`
 	Link                       string            `json:"link"`
 }
@@ -47,7 +67,7 @@ func (w *HourlyWeather) String() string {
 type DailyWeather struct {
 	EpochTime                  int64             `json:"epochTime"`
 	MinTemperature             *float64          `json:"minTemperature"`
-	MaxTemperature             *float64          `json:"MaxTemperature"`
+	MaxTemperature             *float64          `json:"maxTemperature"`
 	Humidity                   float64           `json:"humidity"`
 	UVIndex                    *float64          `json:"uvIndex"`
 	SunriseTime                int64             `json:"sunriseTime"`
@@ -55,7 +75,7 @@ type DailyWeather struct {
 	Wind                       *Wind             `json:"wind"`
 	ProbabilityOfPrecipitation *float64          `json:"probabilityOfPrecipitation"`
 	PrecipitationType          PrecipitationType `json:"precipitationType"`
-	IconResource               *string           `json:"iconResource"`
+	IconId                     *IconId           `json:"iconId"`
 	MobileLink                 string            `json:"mobileLink"`
 	Link                       string            `json:"link"`
 }

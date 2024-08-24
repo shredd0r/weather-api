@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+
 	"github.com/shredd0r/weather-api/dto"
 	"github.com/shredd0r/weather-api/graph/model"
 	"github.com/shredd0r/weather-api/service"
@@ -168,7 +169,7 @@ func (p *WeatherGraphqlApi) mapToCurrentWeather(resp *dto.CurrentWeather) *model
 		MinTemperature:       resp.MinTemperature,
 		MaxTemperature:       resp.MaxTemperature,
 		FeelsLikeTemperature: resp.FeelsLikeTemperature,
-		IconResource:         resp.IconResource,
+		IconID:               resp.IconId,
 		MobileLink:           resp.MobileLink,
 		Link:                 resp.Link,
 	}
@@ -184,7 +185,7 @@ func (p *WeatherGraphqlApi) mapToHourlyWeather(resp *dto.HourlyWeather) *model.H
 		AmountOfPrecipitation:      resp.AmountOfPrecipitation,
 		UvIndex:                    resp.UVIndex,
 		Wind:                       p.mapToWind(resp.Wind),
-		IconResource:               resp.IconResource,
+		IconID:                     resp.IconId,
 		MobileLink:                 resp.MobileLink,
 		Link:                       resp.Link,
 	}
@@ -212,7 +213,7 @@ func (p *WeatherGraphqlApi) mapToDailyWeather(resp *dto.DailyWeather) *model.Dai
 		Wind:                       p.mapToWind(resp.Wind),
 		ProbabilityOfPrecipitation: resp.ProbabilityOfPrecipitation,
 		PrecipitationType:          resp.PrecipitationType,
-		IconResource:               resp.IconResource,
+		IconID:                     resp.IconId,
 		MobileLink:                 resp.MobileLink,
 		Link:                       resp.Link,
 	}

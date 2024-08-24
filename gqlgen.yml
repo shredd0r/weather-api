@@ -89,3 +89,6 @@ models:
   Unit:
     model:
       - github.com/shredd0r/weather-api/dto.Unit
+  IconId:
+    model:
+      - github.com/shredd0r/weather-api/dto.IconId

@@ -9,6 +9,29 @@ const (
 	OpenWeatherUnitsStandard  = "standard"
 )
 
+type OpenWeatherIcon string
+
+const (
+	OpenWeatherClearSkyDay          = "01d"
+	OpenWeatherClearSkyNight        = "01n"
+	OpenWeatherFewCloudsDay         = "02d"
+	OpenWeatherFewCloudsNight       = "02n"
+	OpenWeatherScatteredCloudsDay   = "03d"
+	OpenWeatherScatteredCloudsNight = "03n"
+	OpenWeatherBrokenCloudsDay      = "04d"
+	OpenWeatherBrokenCloudsNight    = "04n"
+	OpenWeatherShowerRainDay        = "09d"
+	OpenWeatherShowerRainNight      = "09n"
+	OpenWeatherRainDay              = "10d"
+	OpenWeatherRainNight            = "10n"
+	OpenWeatherThunderstormDay      = "11d"
+	OpenWeatherThunderstormNight    = "11n"
+	OpenWeatherSnowDay              = "13d"
+	OpenWeatherSnowNight            = "13n"
+	OpenWeatherMistDay              = "50d"
+	OpenWeatherMistNight            = "50n"
+)
+
 type OpenWeatherRequestDto struct {
 	Latitude  float64          `json:"lat"`
 	Longitude float64          `json:"lon"`

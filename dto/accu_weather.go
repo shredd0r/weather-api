@@ -14,7 +14,7 @@ type AccuWeatherRequestDto struct {
 type AccuWeatherCurrentResponseDto struct {
 	EpochTime           int64
 	WeatherText         string
-	WeatherIcon         *uint8
+	WeatherIcon         *int
 	PrecipitationType   PrecipitationType
 	Temperature         AccuWeatherIndicationInfoDto
 	RealFeelTemperature AccuWeatherIndicationInfoDto
@@ -93,7 +93,7 @@ type AccuWeatherSunInfoDto struct {
 }
 
 type AccuWeatherDayInfoDto struct {
-	Icon                     uint8
+	Icon                     int
 	IconPhrase               string
 	HasPrecipitation         bool
 	PrecipitationType        PrecipitationType
