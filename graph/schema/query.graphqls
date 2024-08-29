@@ -1,0 +1,85 @@
+scalar Int64
+scalar Unit
+scalar WeatherId
+scalar PrecipitationType
+scalar WeatherForecaster
+
+type Query {
+    findGeocoding(input: GeocodingRequest): [Geocoding]
+    currentWeather(input: WeatherRequest): CurrentWeather
+    hourlyWeather(input: WeatherRequest): [HourlyWeather]
+    dailyWeather(input: WeatherRequest): [DailyWeather]
+}
+
+input GeocodingRequest {
+    City: String
+    State: String
+    Country: String
+}
+
+input WeatherRequest {
+    coords: Coords!
+    locale: String!
+    unit: Unit!
+    forecaster: WeatherForecaster!
+}
+
+input Coords {
+    latitude: Float!
+    longitude: Float!
+}
+
+type Geocoding {
+    name: String!
+    latitude: Float!
+    longitude: Float!
+    country: String!
+    state: String!
+}
+
+type CurrentWeather {
+    epochTime: Int64!
+    visibility: Float
+    currentTemperature: Float
+    minTemperature: Float
+    maxTemperature: Float
+    feelsLikeTemperature: Float
+    weatherId: WeatherId
+    mobileLink: String!
+    link: String!
+}
+
+type Wind {
+    speed: Float
+    degrees: Float!
+}
+
+type HourlyWeather {
+    epochTime: Int64!
+    currentTemperature: Float
+    feelsLikeTemperature: Float
+    uvIndex: Float
+    probabilityOfPrecipitation: Float
+    precipitationType: PrecipitationType!
+    amountOfPrecipitation: Float
+    wind: Wind
+    weatherId: WeatherId
+    mobileLink: String!
+    link: String!
+}
+
+type DailyWeather {
+    epochTime: Int64!
+    minTemperature: Float
+    maxTemperature: Float
+    humidity: Float!
+    uvIndex: Float
+    sunriseTime: Int64!
+    SunsetTime: Int64!
+    wind: Wind
+    probabilityOfPrecipitation: Float
+    precipitationType: PrecipitationType!
+    weatherId: WeatherId
+    mobileLink: String!
+    link: String!
+}
