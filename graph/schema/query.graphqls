@@ -1,6 +1,6 @@
 scalar Int64
 scalar Unit
-scalar IconId
+scalar WeatherId
 scalar PrecipitationType
 scalar WeatherForecaster
 
@@ -44,7 +44,7 @@ type CurrentWeather {
     minTemperature: Float
     maxTemperature: Float
     feelsLikeTemperature: Float
-    iconId: IconId
+    weatherId: WeatherId
     mobileLink: String!
     link: String!
 }
@@ -63,7 +63,7 @@ type HourlyWeather {
     precipitationType: PrecipitationType!
     amountOfPrecipitation: Float
     wind: Wind
-    iconId: IconId
+    weatherId: WeatherId
     mobileLink: String!
     link: String!
 }
@@ -79,7 +79,7 @@ type DailyWeather {
     wind: Wind
     probabilityOfPrecipitation: Float
     precipitationType: PrecipitationType!
-    iconId: IconId
+    weatherId: WeatherId
     mobileLink: String!
     link: String!
 }

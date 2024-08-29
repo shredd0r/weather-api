@@ -14,7 +14,7 @@ func OpenWeatherMapCurrentWeather(response *dto.OpenWeatherCurrentWeatherRespons
 		Visibility:           util.PercentToFloat64Pointer(&response.Visibility),
 		CurrentTemperature:   &response.Main.Temperature,
 		FeelsLikeTemperature: &response.Main.FeelsLike,
-		IconId:               openWeatherGetPointerIconId(&response.Weather),
+		WeatherId:            openWeatherGetPointerWeatherId(&response.Weather),
 	}
 }
 
@@ -81,7 +81,7 @@ func mapOpenWeatherForecastInfoDtoToDailyWeather(weatherForecast dto.OpenWeather
 		},
 		ProbabilityOfPrecipitation: &weatherForecast.ProbabilityOfPrecipitation,
 		PrecipitationType:          precipitationType,
-		IconId:                     openWeatherGetPointerIconId(weatherForecast.WeatherInfos),
+		WeatherId:                  openWeatherGetPointerWeatherId(weatherForecast.WeatherInfos),
 	}
 }
 
@@ -100,7 +100,7 @@ func openWeatherForecastInfoDtoToHourlyWeather(weatherForecast dto.OpenWeatherFo
 			Speed:   &weatherForecast.WindInfo.Speed,
 			Degrees: weatherForecast.WindInfo.Degrees,
 		},
-		IconId: openWeatherGetPointerIconId(weatherForecast.WeatherInfos),
+		WeatherId: openWeatherGetPointerWeatherId(weatherForecast.WeatherInfos),
 	}
 }
 
@@ -130,37 +130,37 @@ func openWeatherGetPrecipitationType(weatherForecast dto.OpenWeatherForecastInfo
 	return dto.PrecipitationTypeEmpty
 }
 
-func openWeatherGetPointerIconId(weatherInfoDtos *[]dto.OpenWeatherWeatherInfoDto) *dto.IconId {
+func openWeatherGetPointerWeatherId(weatherInfoDtos *[]dto.OpenWeatherWeatherInfoDto) *dto.WeatherId {
 	if weatherInfoDtos == nil {
 		return nil
 	}
 
-	var iconId dto.IconId
+	var WeatherId dto.WeatherId
 	weatherInfo := (*weatherInfoDtos)[0]
 
 	switch weatherInfo.Icon {
 	case dto.OpenWeatherClearSkyDay:
-		iconId = dto.IconIdClearDay
+		WeatherId = dto.WeatherIdClearDay
 	case dto.OpenWeatherClearSkyNight:
-		iconId = dto.IconIdClearNight
+		WeatherId = dto.WeatherIdClearNight
 	case dto.OpenWeatherFewCloudsDay:
-		iconId = dto.IconIdCloudyDay
+		WeatherId = dto.WeatherIdCloudyDay
 	case dto.OpenWeatherFewCloudsNight:
-		iconId = dto.IconIdCloudyNight
+		WeatherId = dto.WeatherIdCloudyNight
 	case dto.OpenWeatherScatteredCloudsDay, dto.OpenWeatherScatteredCloudsNight, dto.OpenWeatherBrokenCloudsDay, dto.OpenWeatherBrokenCloudsNight:
-		iconId = dto.IconIdCloudy
+		WeatherId = dto.WeatherIdCloudy
 	case dto.OpenWeatherShowerRainDay, dto.OpenWeatherRainDay:
-		iconId = dto.IconIdRainyDay
+		WeatherId = dto.WeatherIdRainyDay
 	case dto.OpenWeatherShowerRainNight, dto.OpenWeatherRainNight:
-		iconId = dto.IconIdRainyNight
+		WeatherId = dto.WeatherIdRainyNight
 	case dto.OpenWeatherThunderstormDay, dto.OpenWeatherThunderstormNight:
-		iconId = dto.IconIdThunder
+		WeatherId = dto.WeatherIdThunder
 	case dto.OpenWeatherSnowDay, dto.OpenWeatherSnowNight:
-		iconId = dto.IconIdSnowy
+		WeatherId = dto.WeatherIdSnowy
 	case dto.OpenWeatherMistDay, dto.OpenWeatherMistNight:
-		iconId = dto.IconIdMist
+		WeatherId = dto.WeatherIdMist
 	}
-	return &iconId
+	return &WeatherId
 }
 
 func getUnits(unit dto.Unit) dto.OpenWeatherUnits {

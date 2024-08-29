@@ -12,15 +12,15 @@ type Coords struct {
 }
 
 type CurrentWeather struct {
-	EpochTime            int64       `json:"epochTime"`
-	Visibility           *float64    `json:"visibility,omitempty"`
-	CurrentTemperature   *float64    `json:"currentTemperature,omitempty"`
-	MinTemperature       *float64    `json:"minTemperature,omitempty"`
-	MaxTemperature       *float64    `json:"maxTemperature,omitempty"`
-	FeelsLikeTemperature *float64    `json:"feelsLikeTemperature,omitempty"`
-	IconID               *dto.IconId `json:"iconId,omitempty"`
-	MobileLink           string      `json:"mobileLink"`
-	Link                 string      `json:"link"`
+	EpochTime            int64          `json:"epochTime"`
+	Visibility           *float64       `json:"visibility,omitempty"`
+	CurrentTemperature   *float64       `json:"currentTemperature,omitempty"`
+	MinTemperature       *float64       `json:"minTemperature,omitempty"`
+	MaxTemperature       *float64       `json:"maxTemperature,omitempty"`
+	FeelsLikeTemperature *float64       `json:"feelsLikeTemperature,omitempty"`
+	WeatherID            *dto.WeatherId `json:"weatherId,omitempty"`
+	MobileLink           string         `json:"mobileLink"`
+	Link                 string         `json:"link"`
 }
 
 type DailyWeather struct {
@@ -34,7 +34,7 @@ type DailyWeather struct {
 	Wind                       *Wind                 `json:"wind,omitempty"`
 	ProbabilityOfPrecipitation *float64              `json:"probabilityOfPrecipitation,omitempty"`
 	PrecipitationType          dto.PrecipitationType `json:"precipitationType"`
-	IconID                     *dto.IconId           `json:"iconId,omitempty"`
+	WeatherID                  *dto.WeatherId        `json:"weatherId,omitempty"`
 	MobileLink                 string                `json:"mobileLink"`
 	Link                       string                `json:"link"`
 }
@@ -62,7 +62,7 @@ type HourlyWeather struct {
 	PrecipitationType          dto.PrecipitationType `json:"precipitationType"`
 	AmountOfPrecipitation      *float64              `json:"amountOfPrecipitation,omitempty"`
 	Wind                       *Wind                 `json:"wind,omitempty"`
-	IconID                     *dto.IconId           `json:"iconId,omitempty"`
+	WeatherID                  *dto.WeatherId        `json:"weatherId,omitempty"`
 	MobileLink                 string                `json:"mobileLink"`
 	Link                       string                `json:"link"`
 }

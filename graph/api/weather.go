@@ -169,7 +169,7 @@ func (p *WeatherGraphqlApi) mapToCurrentWeather(resp *dto.CurrentWeather) *model
 		MinTemperature:       resp.MinTemperature,
 		MaxTemperature:       resp.MaxTemperature,
 		FeelsLikeTemperature: resp.FeelsLikeTemperature,
-		IconID:               resp.IconId,
+		WeatherID:            resp.WeatherId,
 		MobileLink:           resp.MobileLink,
 		Link:                 resp.Link,
 	}
@@ -185,7 +185,7 @@ func (p *WeatherGraphqlApi) mapToHourlyWeather(resp *dto.HourlyWeather) *model.H
 		AmountOfPrecipitation:      resp.AmountOfPrecipitation,
 		UvIndex:                    resp.UVIndex,
 		Wind:                       p.mapToWind(resp.Wind),
-		IconID:                     resp.IconId,
+		WeatherID:                  resp.WeatherId,
 		MobileLink:                 resp.MobileLink,
 		Link:                       resp.Link,
 	}
@@ -213,7 +213,7 @@ func (p *WeatherGraphqlApi) mapToDailyWeather(resp *dto.DailyWeather) *model.Dai
 		Wind:                       p.mapToWind(resp.Wind),
 		ProbabilityOfPrecipitation: resp.ProbabilityOfPrecipitation,
 		PrecipitationType:          resp.PrecipitationType,
-		IconID:                     resp.IconId,
+		WeatherID:                  resp.WeatherId,
 		MobileLink:                 resp.MobileLink,
 		Link:                       resp.Link,
 	}

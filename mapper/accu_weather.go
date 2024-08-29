@@ -26,7 +26,7 @@ func AccuWeatherMapToCurrentWeatherDto(unit dto.Unit, accuWeather *dto.AccuWeath
 		Visibility:           getVolumeByUnit(unit, accuWeather.Visibility),
 		CurrentTemperature:   getVolumeByUnit(unit, accuWeather.Temperature),
 		FeelsLikeTemperature: getVolumeByUnit(unit, accuWeather.RealFeelTemperature),
-		IconId:               accuWeatherGetPointerIconId(accuWeather.WeatherIcon),
+		WeatherId:            accuWeatherGetPointerWeatherId(accuWeather.WeatherIcon),
 		MobileLink:           accuWeather.MobileLink,
 		Link:                 accuWeather.Link,
 	}
@@ -71,7 +71,7 @@ func accuWeatherMapHourlyResponse(responseDto *dto.AccuWeatherHourlyResponseDto)
 			Speed:   responseDto.Wind.Speed.Value,
 			Degrees: responseDto.Wind.Direction.Degrees,
 		},
-		IconId:     accuWeatherGetPointerIconId(responseDto.WeatherIcon),
+		WeatherId:  accuWeatherGetPointerWeatherId(responseDto.WeatherIcon),
 		MobileLink: responseDto.MobileLink,
 		Link:       responseDto.Link,
 	}
@@ -93,7 +93,7 @@ func accuWeatherMapDailyResponse(dailyForecast *dto.AccuWeatherDailyForecastDto)
 		Humidity:       util.PercentToFloat64(dayInfo.RelativeHumidity.Average),
 		SunriseTime:    dailyForecast.Sun.EpochRise,
 		SunsetTime:     dailyForecast.Sun.EpochSet,
-		IconId:         accuWeatherGetPointerIconId(&dayInfo.Icon),
+		WeatherId:      accuWeatherGetPointerWeatherId(&dayInfo.Icon),
 		MobileLink:     dailyForecast.MobileLink,
 		Link:           dailyForecast.Link,
 	}
@@ -159,46 +159,46 @@ func getVolumeByUnit(unit dto.Unit, v dto.AccuWeatherIndicationInfoDto) *float64
 	}
 }
 
-func accuWeatherGetPointerIconId(weatherIcon *int) *dto.IconId {
+func accuWeatherGetPointerWeatherId(weatherIcon *int) *dto.WeatherId {
 	if weatherIcon != nil {
-		iconId := accuWeatherGetIconId(*weatherIcon)
-		return &iconId
+		WeatherId := accuWeatherGetWeatherId(*weatherIcon)
+		return &WeatherId
 	}
 	return nil
 }
 
 // Link to icon number https://developer.accuweather.com/weather-icons
-func accuWeatherGetIconId(weatherIcon int) dto.IconId {
+func accuWeatherGetWeatherId(weatherIcon int) dto.WeatherId {
 	switch {
 	case isClearDay(weatherIcon):
-		return dto.IconIdClearDay
+		return dto.WeatherIdClearDay
 	case isCloudyDay(weatherIcon):
-		return dto.IconIdCloudyDay
+		return dto.WeatherIdCloudyDay
 	case isCloudy(weatherIcon):
-		return dto.IconIdCloudy
+		return dto.WeatherIdCloudy
 	case isRainy(weatherIcon):
-		return dto.IconIdRainy
+		return dto.WeatherIdRainy
 	case isRainyDay(weatherIcon):
-		return dto.IconIdRainyDay
+		return dto.WeatherIdRainyDay
 	case isTrunder(weatherIcon):
-		return dto.IconIdThunder
+		return dto.WeatherIdThunder
 	case isSnowy(weatherIcon):
-		return dto.IconIdSnowy
+		return dto.WeatherIdSnowy
 	case isSnowyDay(weatherIcon):
-		return dto.IconIdSnowyDay
+		return dto.WeatherIdSnowyDay
 	case isClearNight(weatherIcon):
-		return dto.IconIdClearNight
+		return dto.WeatherIdClearNight
 	case isCloudyNight(weatherIcon):
-		return dto.IconIdCloudyNight
+		return dto.WeatherIdCloudyNight
 	case isRainyNight(weatherIcon):
-		return dto.IconIdRainyNight
+		return dto.WeatherIdRainyNight
 	case isSnowyNight(weatherIcon):
-		return dto.IconIdSnowyNight
+		return dto.WeatherIdSnowyNight
 	case isMist(weatherIcon):
-		return dto.IconIdMist
+		return dto.WeatherIdMist
 	}
 
-	return dto.IconIdUndefined
+	return dto.WeatherIdUndefined
 }
 
 func isClearDay(weatherIcon int) bool {

@@ -47,7 +47,7 @@ query {
       "minTemperature": null,
       "MaxTemperature": null,
       "FeelsLikeTemperature": 31.1,
-      "iconResource": null,
+      "weatherId": 01,
       "mobileLink": "http://www.accuweather.com/uk/tr/yagmur/1284006/current-weather/1284006",
       "Link": "http://www.accuweather.com/uk/tr/yagmur/1284006/current-weather/1284006"
     }
