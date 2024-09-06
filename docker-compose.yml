@@ -17,4 +17,4 @@ services:
       API_KEY_OPEN_WEATHER: ${API_KEY_OPEN_WEATHER}
       API_KEY_API_NINJAS: ${API_KEY_API_NINJAS}
     ports:
-      - '8080:8080'
+      - '${SERVER_PORT}:${SERVER_PORT}'
