@@ -2,11 +2,11 @@
 
 1. Create virtual environment:
 ```bash
-    pip3 venv -m the-weather-channel-api
+    pip3 venv -m .venv
 ```
 2. Activate environment:
 ```bash
-    source the-weather-channel-api/bin/active
+    source .venv/bin/active
 ```
 3. Install dependencies:
 ```bash
@@ -14,5 +14,5 @@
 ```
 4. Run project
 ```bash
-    fastapi dev controller.py 
+    fastapi dev  
 ```

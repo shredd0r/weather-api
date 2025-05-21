@@ -5,6 +5,9 @@ from models import GetSunV3LocationSearchRequest, GetSunV3LocationSearchResponse
 
 
 class WeatherClient:
+    r"""
+        WeatherClient has methods for call 'The Weather Channel' backend
+    """
     def __init__(self, logger: Logger):
         self.logger = logger
 

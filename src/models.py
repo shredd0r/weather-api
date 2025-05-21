@@ -53,13 +53,13 @@ class DailyWeatherForecast(BaseModel):
     link: str
 
 class WeatherForecastRequest(BaseModel):
-    city_id: str
+    place_id: str
     localization: str
     unit_type: UnitType
 
 class GetLocationSearchRequest(BaseModel):
-    language: str
-    city_address: str
+    localization: str
+    place_details: str
         
 class Location(BaseModel):
     place_id: str
