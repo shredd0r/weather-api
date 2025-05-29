@@ -54,6 +54,7 @@ SELECTOR_FOR_DAILY_UV_INDEX = 'div[class*="DetailsTable--field--"] > span[class*
 SELECTOR_FOR_DAILY_RISE_SET_TIME = 'div[class*="DetailsTable--field--"] > span[class*="DetailsTable--value--"]:not([data-testid=PercentageValue]):not([data-testid="UVIndexValue"])'
 SELECTOR_FOR_DAILY_ICON_NAME = 'svg[class*="DailyContent--weatherIcon--"] > title'
 SELECTOR_FOR_DAILY_PRECIPITATION_TYPE = 'svg[class*="DailyContent--precipIcon--"] > title'
+SELECTOR_FOR_DAILY_DAY = 'span[class*="DailyContent--daypartDate--"]'
 
 SELECTOR_FOR_WIND = 'span[class*="Wind--windWrapper--"][data-testid="Wind"]'
 SELECTOR_FOR_NOT_FOUND = 'div[class*="NotFound--notFound--"]'
@@ -180,13 +181,12 @@ class WeatherService:
             In this work flow just once check "is night?".
         """
 
-        first_day_in_forecasts = 0
-        datetime.datetime.now(tz=)
-        epoch_time = int(datetime.datetime.now().timestamp())
         start_index = 0
-        local_time_seconds = self._get_seconds_from_last_updated_time_daily_weather_forecast(html_parser)
+        day = self._get_day_from_daily_detail(daily_detail_nodes[0])
+        last_updated_time = self._get_local_last_updated_time(html_parser, SELECTOR_FOR_DAILY_LAST_UPDATED_TIME)
+        epoch_time = self._get_local_datetime_by(day, last_updated_time)
+        local_time_seconds = self._get_seconds_by_time(last_updated_time)
         if self._is_night(local_time_seconds):
-            epoch_time = 0
             night = self._get_daily_detail_forecast(daily_summary_nodes[0], daily_detail_nodes[0], INDEX_FOR_FIRST_DAILY_BLOCK)
 
             daily_weather_forecasts.append(
@@ -231,11 +231,30 @@ class WeatherService:
         """
         pass
     
-    def _get_seconds_from_last_updated_time_daily_weather_forecast(self, html_parser: HTMLParser) -> int:
+    def _get_local_datetime_by(self, day: int, time: datetime.time) -> datetime.datetime:
+        current_datetime = datetime.datetime.now()
+        local_datetime = datetime.datetime(year= current_datetime.year, 
+                                           month=current_datetime.month,
+                                           day=day,
+                                           hour=time.hour,
+                                           minute=time.minute)
+
+        return local_datetime.timestamp() * 1000
+    
+    def _get_local_last_updated_time(self, html_page: HTMLParser, selector) -> datetime.time:
         # Will be returned like: 'As of 03:48 GMT-03:00'
-        last_updated_str = html_parser.css_first(SELECTOR_FOR_DAILY_LAST_UPDATED_TIME).text()
+        last_updated_str = html_page.css_first(selector).text()
+
+        # This regex will be return '03:48' from string: 'As of 03:48 GMT-03:00'
         time_str = re.search(r'(?<=\s)\d{2}:\d{2}', last_updated_str).group(0)
-        return self._get_seconds_by_str_time(time_str)
+        return  datetime.datetime.strptime(time_str, "%H:%M").time()
+
+    def _get_day_from_daily_detail(self, detail_node: Node) -> int:
+        day_with_week_name = detail_node.css_first(SELECTOR_FOR_DAILY_DAY).text()
+
+        # Will be return '01' from 'Thu 01'
+        day = re.search(r"\d{2}", day_with_week_name).group(0)
+        return int(day)
         
     def _is_night(self, time_in_seconds: int) -> bool:
         evening = self._get_seconds_by_str_time("15:00")
@@ -335,6 +354,9 @@ class WeatherService:
 
     def _get_seconds_by_str_time(self, time_str: str) -> int:
         time = datetime.datetime.strptime(time_str, "%H:%M").time()
+        return self._get_seconds_by_time(time)
+
+    def _get_seconds_by_time(self, time: datetime.time) -> int:
         return time.hour * 3600 + time.minute * 60
 
     def _get_celestial_by(self, node: Node, index_of_element: int = 0) -> Celestial:
