@@ -4,9 +4,11 @@ from typing import List
 from pydantic import BaseModel
 
 class PrecipitationType(Enum):
-    RAIN = "rain"
-    SNOW = "snow"
-    ICE = "ice"
+    NONE = "0"
+    RAIN = "1"
+    SNOW = "2"
+    MIXED = "3"
+    ICE = "4"
 
 class UnitType(Enum):
     METRIC = 1
@@ -15,6 +17,10 @@ class UnitType(Enum):
 class Wind(BaseModel):
     direction: str
     speed: float
+
+class Celestial(BaseModel):
+    rise_time: int
+    set_time: int
 
 class CurrentWeatherForecast(BaseModel):
     epoch_time: int
@@ -38,18 +44,20 @@ class HourlyWeatherForecast(BaseModel):
     icon: str
     link: str
         
-class DailyWeatherForecast(BaseModel):
-    epoch_time: int
-    min_temperature: float
-    max_temperature: float
+class DailyWeatherForecastDetail(BaseModel):
+    temperature: int
     humidity: float
-    uv_index: float
-    sunrise_time: int
-    sunset_time: int
     wind: Wind
+    rise_time: int
+    set_time: int
     probability_of_precipitation: float
     precipitation_type: PrecipitationType
-    icon_id: str
+    icon_name: str
+
+class DailyWeatherForecast(BaseModel):
+    epoch_time: int
+    day: DailyWeatherForecastDetail | None
+    night: DailyWeatherForecastDetail
     link: str
 
 class WeatherForecastRequest(BaseModel):

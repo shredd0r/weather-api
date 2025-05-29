@@ -21,7 +21,7 @@ def hourly_weather(place_id: str, localization: str, unit_type: int) -> List[Hou
     request = WeatherForecastRequest(place_id= place_id, localization= localization, unit_type= unit_type)
     return weather_service.get_hourly_weather(request)
 
-@app.get("/weather/daily/{city_id}")
+@app.get("/weather/daily/{place_id}")
 def daily_weather(place_id: str, localization: str, unit_type: int) -> List[DailyWeatherForecast]:
     request = WeatherForecastRequest(place_id= place_id, localization= localization, unit_type= unit_type)
     return weather_service.get_daily_weather(request)

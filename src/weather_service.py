@@ -1,12 +1,14 @@
+import datetime
 import re
 import logging
 from types import NoneType
 from typing import List
 import requests
 from selectolax.parser import HTMLParser
+from selectolax.parser import Node
 import time
 
-from models import CurrentWeatherForecast, DailyWeatherForecast, GetLocationSearchRequest, HourlyWeatherForecast, Location, PrecipitationType, UnitType, WeatherForecastRequest, Wind
+from models import Celestial, CurrentWeatherForecast, DailyWeatherForecast, DailyWeatherForecastDetail, GetLocationSearchRequest, HourlyWeatherForecast, Location, PrecipitationType, UnitType, WeatherForecastRequest, Wind
 
 # localization = standard 'BCP 47': uk-UA, 
 # interval = today / hourbyhour / tenday, 
@@ -37,10 +39,29 @@ SELECTOR_FOR_HOURLY_FEELS_LIKE_TEMPERATURE = 'span[class*=DetailsTable--value--]
 SELECTOR_FOR_HOURLY_UV_INDEX = 'span[class*=DetailsTable--value--][data-testid="UVIndexValue"]'
 SELECTOR_FOR_HOURLY_PROBABILITY_OF_PRECIPITATION = 'div[class*="DetailsSummary--precip--"] > span[data-testid="PercentageValue"]'
 SELECTOR_FOR_HOURLY_AMOUNT_OF_PRECIPITATION = 'li[class*="DetailsTable--listItem--"][data-testid="AccumulationSection"] > div > span > span:first-child'
-SELECTOR_FOR_HOURLY_WIND = 'span[class*="Wind--windWrapper--"][data-testid="Wind"] > span'
 SELECTOR_FOR_HOURLY_ICON_NAME = 'svg[class*="DetailsSummary--wxIcon--"] > title'
+SELECTOR_FOR_HOURLY_PRECIPITATION_TYPE = 'li[class*="DetailsTable--listItem--"][data-testid="AccumulationSection"] > span > svg[class*="DetailsTable--icon--"] > title'
 
+SELECTOR_FOR_DAILY_LAST_UPDATED_TIME = 'div[class*="DailyForecast--timestamp--"]'
+SELECTOR_FOR_DAILY_BLOCK_SUMMARY_FORECAST = 'div[class*="DetailsSummary--DetailsSummary--"]'
+SELECTOR_FOR_DAILY_BLOCK_DETAIL_TABLE_FORECAST = 'div[class*="DaypartDetails--Content--"]'
+SELECTOR_FOR_DAILY_BLOCK_CONTENT = 'div[class*="DailyContent--DailyContent--"]'
+SELECTOR_FOR_DAILY_DETAILS_TABLE = 'div[class*="DaypartDetails--DetailsTable--"]'
+SELECTOR_FOR_DAILY_TEMPERATURE = 'span[class*="DailyContent--temp--"][data-testid="TemperatureValue"]'
+SELECTOR_FOR_DAILY_PROBABILITY_OF_PRECIPITATION = 'span[class*="DailyContent--value--"][data-testid="PercentageValue"]'
+SELECTOR_FOR_DAILY_HUMIDITY = 'div[class*="DetailsTable--field--"] > span[class*="DetailsTable--value--"][data-testid="PercentageValue"]'
+SELECTOR_FOR_DAILY_UV_INDEX = 'div[class*="DetailsTable--field--"] > span[class*="DetailsTable--value--"][data-testid="UVIndexValue"]'
+SELECTOR_FOR_DAILY_RISE_SET_TIME = 'div[class*="DetailsTable--field--"] > span[class*="DetailsTable--value--"]:not([data-testid=PercentageValue]):not([data-testid="UVIndexValue"])'
+SELECTOR_FOR_DAILY_ICON_NAME = 'svg[class*="DailyContent--weatherIcon--"] > title'
+SELECTOR_FOR_DAILY_PRECIPITATION_TYPE = 'svg[class*="DailyContent--precipIcon--"] > title'
+
+SELECTOR_FOR_WIND = 'span[class*="Wind--windWrapper--"][data-testid="Wind"]'
 SELECTOR_FOR_NOT_FOUND = 'div[class*="NotFound--notFound--"]'
+
+INDEX_FOR_FIRST_DAILY_BLOCK = 0
+INDEX_FOR_SECOND_DAILY_BLOCK = 1
+
+SECONDS_IN_DAY = 24 * 60 * 60
 
 
 class WeatherService:
@@ -112,16 +133,17 @@ class WeatherService:
             feels_like_temperature = self._get_temperature_by(hourly_detail_nodes[i], SELECTOR_FOR_HOURLY_FEELS_LIKE_TEMPERATURE)
             uv_index = self._get_uv_index(hourly_detail_nodes[i], SELECTOR_FOR_HOURLY_UV_INDEX)
             probability_of_precipitation = self._get_percent_by(hourly_summary_nodes[i], SELECTOR_FOR_HOURLY_PROBABILITY_OF_PRECIPITATION)
+            precipitation_type = self._which_precipitation_type(hourly_detail_nodes[i], SELECTOR_FOR_HOURLY_PRECIPITATION_TYPE)
             amount_of_precipitation = self._get_amount_of_precipitation(hourly_detail_nodes[i])
-            wind = self._get_wind_by(hourly_detail_nodes[i], SELECTOR_FOR_HOURLY_WIND)
-            icon_name = self._get_icon_name(hourly_summary_nodes[i])
+            wind = self._get_wind_by(hourly_detail_nodes[i])
+            icon_name = self._get_icon_name(hourly_summary_nodes[i], SELECTOR_FOR_HOURLY_ICON_NAME)
 
             hourly_weather_forecasts.append(HourlyWeatherForecast(epoch_time=epoch_time,
                                                                   current_temperature=current_temperature,
                                                                   feels_like_temperature=feels_like_temperature,
                                                                   uv_index=uv_index,
                                                                   probability_of_precipitation=probability_of_precipitation,
-                                                                  precipitation_type=PrecipitationType.RAIN,
+                                                                  precipitation_type=precipitation_type,
                                                                   amount_of_precipitation =amount_of_precipitation,
                                                                   wind= wind,
                                                                   icon= icon_name,
@@ -139,8 +161,62 @@ class WeatherService:
                     place_id: str - id which you can get from WeatherClient.get_sun_location_search()
                     localization: str - localization string in standard 'BCP 47'. For example: 'uk-UA'
                     unit_type: UnitType
+            
+            after 15:00 local time, first element daily weather forecast return only for night 
         """
-        pass
+
+        self.logger.debug("start getting daily weather forecast")
+        url = self._get_url_for_get_weather_page(DAILY_FORECAST_INTERVAL, request)
+        html_parser = self._get_html_parser_for_weather_page(url)
+
+        daily_weather_forecasts = []
+        daily_summary_nodes = html_parser.css(SELECTOR_FOR_DAILY_BLOCK_SUMMARY_FORECAST)
+        daily_detail_nodes = html_parser.css(SELECTOR_FOR_DAILY_BLOCK_DETAIL_TABLE_FORECAST)
+
+        r"""
+            For first element need check local time, because backend return only night block between time 15:00 - 03:00
+
+            I write copy-paste code because I dont want check every iteration "is first day?" then "is night?"
+            In this work flow just once check "is night?".
+        """
+
+        first_day_in_forecasts = 0
+        datetime.datetime.now(tz=)
+        epoch_time = int(datetime.datetime.now().timestamp())
+        start_index = 0
+        local_time_seconds = self._get_seconds_from_last_updated_time_daily_weather_forecast(html_parser)
+        if self._is_night(local_time_seconds):
+            epoch_time = 0
+            night = self._get_daily_detail_forecast(daily_summary_nodes[0], daily_detail_nodes[0], INDEX_FOR_FIRST_DAILY_BLOCK)
+
+            daily_weather_forecasts.append(
+                 DailyWeatherForecast(
+                    epoch_time=epoch_time,
+                    day=None,
+                    night=night,
+                    link=url
+                )
+            )
+            start_index = 1
+
+
+        for i in range(start_index, len(daily_summary_nodes)):
+            day = self._get_daily_detail_forecast(daily_summary_nodes[i], daily_detail_nodes[i], INDEX_FOR_FIRST_DAILY_BLOCK)
+            night = self._get_daily_detail_forecast(daily_summary_nodes[i], daily_detail_nodes[i], INDEX_FOR_SECOND_DAILY_BLOCK)
+
+            daily_weather_forecasts.append(
+                DailyWeatherForecast(
+                    epoch_time=epoch_time,
+                    day=day,
+                    night=night,
+                    link=url
+                )
+            )
+
+            epoch_time += SECONDS_IN_DAY
+        
+        return daily_weather_forecasts
+
 
     def search_location_id(self, request: GetLocationSearchRequest) -> List[Location]:
         r"""
@@ -154,29 +230,89 @@ class WeatherService:
 
         """
         pass
+    
+    def _get_seconds_from_last_updated_time_daily_weather_forecast(self, html_parser: HTMLParser) -> int:
+        # Will be returned like: 'As of 03:48 GMT-03:00'
+        last_updated_str = html_parser.css_first(SELECTOR_FOR_DAILY_LAST_UPDATED_TIME).text()
+        time_str = re.search(r'(?<=\s)\d{2}:\d{2}', last_updated_str).group(0)
+        return self._get_seconds_by_str_time(time_str)
+        
+    def _is_night(self, time_in_seconds: int) -> bool:
+        evening = self._get_seconds_by_str_time("15:00")
+        morning = self._get_seconds_by_str_time("03:00")
 
-    def _get_wind_by(self, html_parser: HTMLParser, selector: str) -> Wind:
+        # Backend return only night block between time 15:00 - 03:00
+        return time_in_seconds >= evening or time_in_seconds <= morning
+
+    def _which_precipitation_type(self, html_parser: HTMLParser, selector: str, index_of_element: int = 0) -> PrecipitationType:
+        precipitation_type_title = html_parser.css(selector)[index_of_element]
+
+        if type(precipitation_type_title) == NoneType:
+            self.logger.debug("title of precipitation type not found, return type 'NONE'")
+            return PrecipitationType.NONE
+        
+        precipitation_type_text = precipitation_type_title.text()
+
+        if "Rain" in precipitation_type_text:
+            self.logger.debug("title of precipitation type is rain, return 'RAIN'")
+            return PrecipitationType.RAIN
+        
+        if "Mixed" in precipitation_type_text:
+            self.logger.debug("title of precipitation type is mixed, return 'MIXED'")
+            return PrecipitationType.MIXED
+        
+        if "Snowflake" == precipitation_type_text:
+            self.logger.debug("title of precipitation type is mixed, return 'SNOW'")
+            return PrecipitationType.SNOW
+
+        return PrecipitationType.ICE
+
+
+    def _get_wind_by(self, html_parser: HTMLParser, index_of_element: int = 0) -> Wind:
         r"""
-            This selector return spans likes:
-                <span> WSW </span>
-                <span> 6 </span>
-                <span> km/h </span>
+            Wind block have similar selector, Parser return element like that:
+            <span> # element
+                <span> WSW </span>  # volume
+                <span> 6 </span>    #
+                <span> km/h </span> #
+            <span>
             So, second element is weather speed
         """
-        wind_elements = html_parser.css(selector)
+        wind_elements = html_parser.css(SELECTOR_FOR_WIND)
+        wind_element = wind_elements[index_of_element]
        
         # 0 - direction, 1 - speed
-        direction = wind_elements[0].text()[:-1]
-        speed = wind_elements[1].text()
+        wind_volumes = wind_element.css(f"span:not({SELECTOR_FOR_WIND})")
+        direction = wind_volumes[0].text()[:-1]
+        speed = wind_volumes[1].text()
         self.logger.debug(f"got direction: {direction}, speed: {speed}")
         return Wind(direction= direction, 
                     speed= speed)
 
+    def _get_daily_detail_forecast(self, summary_block: Node, detail_block: Node, index_of_block: int):
+        temperature = self._get_temperature_by(detail_block, SELECTOR_FOR_DAILY_TEMPERATURE, index_of_block)
+        humidity = self._get_percent_by(detail_block, SELECTOR_FOR_DAILY_HUMIDITY, index_of_block)
+        wind = self._get_wind_by(detail_block, index_of_block)
+        celestial = self._get_celestial_by(detail_block, index_of_block)
+        probability_of_precipitation = self._get_percent_by(detail_block, SELECTOR_FOR_DAILY_PROBABILITY_OF_PRECIPITATION, index_of_block)
+        precipitation_type = self._which_precipitation_type(detail_block, SELECTOR_FOR_DAILY_PRECIPITATION_TYPE, index_of_block)
+        icon_name = self._get_icon_name(detail_block, SELECTOR_FOR_DAILY_ICON_NAME, index_of_block)
+
+        return DailyWeatherForecastDetail(
+            temperature= temperature,
+            humidity= humidity,
+            wind= wind,
+            rise_time= celestial.rise_time,
+            set_time= celestial.set_time,
+            probability_of_precipitation= probability_of_precipitation,
+            precipitation_type= precipitation_type,
+            icon_name= icon_name)
+
     def _get_url_for_get_weather_page(self, interval: str, request: WeatherForecastRequest) -> str:
         return WEATHER_URL_FORMAT.format(localization= request.localization, 
-                                        interval= interval, 
-                                        place_id= request.place_id,
-                                        unit= self._map_unit_type(request.unit_type))
+                                         interval= interval, 
+                                         place_id= request.place_id,
+                                         unit= self._map_unit_type(request.unit_type))
         
     def _get_html_parser_for_weather_page(self, url: str) -> HTMLParser:
         self.logger.debug(f"prepared request for get weather page, url: {url}")
@@ -196,32 +332,75 @@ class WeatherService:
             return METRIC_UNIT_TYPE
         
         return IMPERIA_UNIT_TYPE
-            
+
+    def _get_seconds_by_str_time(self, time_str: str) -> int:
+        time = datetime.datetime.strptime(time_str, "%H:%M").time()
+        return time.hour * 3600 + time.minute * 60
+
+    def _get_celestial_by(self, node: Node, index_of_element: int = 0) -> Celestial:
+        r"""
+            This method will be return array with 4 nodes where:
+                <span>06:00</span>  # index of list [0] = sunrise
+                <span>19:00</span>  # index of list [1] = sunset
+                <span>19:00</span>  # index of list [2] = moonrise
+                <span>05:00</span>  # index of list [3] = moonset
+        """
+        time_str_elements = node.css(SELECTOR_FOR_DAILY_RISE_SET_TIME)
+
+        if len(time_str_elements) == 0:
+            self.logger.debug("selector for celestial not found elements")
+            raise TypeError("selector for celestial not found elements")
+
+
+        if index_of_element == 0:
+            return Celestial(
+                rise_time=self._get_seconds_by_str_time(time_str_elements[0].text()),
+                set_time=self._get_seconds_by_str_time(time_str_elements[1].text())
+            )
+        
+        return Celestial(
+            rise_time=self._get_seconds_by_str_time(time_str_elements[0].text()),
+            set_time=self._get_seconds_by_str_time(time_str_elements[1].text())
+        )
 
     def _page_is_not_found(self, html_parser: HTMLParser) -> bool:
         not_found_node = html_parser.css_first(SELECTOR_FOR_NOT_FOUND)
         return type(not_found_node) != NoneType
 
-    def _get_temperature_by(self, html_parser: HTMLParser, selector: str):
+    def _get_temperature_by(self, html_parser: HTMLParser, selector: str, element_index: int = 0):
         self.logger.debug(f"try return temperature by selector:{selector}")
-        temperature_element = html_parser.css_first(selector)
+        temperature_elements = html_parser.css(selector)
+        self.logger.debug(f"temperatures: {temperature_elements[0].text()}")
+
+        if len(temperature_elements) == 0:
+            self.logger.debug("list with temperature element is empty")
+            raise TypeError("selector for temperature not found elements")
 
         # Remove degree symbol from text
-        temperature = temperature_element.text().replace("°", "")
+        temperature = temperature_elements[element_index].text().replace("°", "")
         self.logger.debug(f"got temperature: {temperature}")
         return temperature
 
-    def _get_percent_by(self, html_parser: HTMLParser, selector: str) -> int:
-        perсent_element = html_parser.css_first(selector)
+    def _get_percent_by(self, html_parser: HTMLParser, selector: str, index_of_element: int = 0) -> int:
+        self.logger.debug(f"try return percent by selector:{selector}")
+        perсent_elements = html_parser.css(selector)
 
-        percent = perсent_element.text().replace("%", "")
+        if len(perсent_elements) == 0:
+            self.logger.debug("list with percent element is empty")
+            raise TypeError("selector for percent not found elements")
+        
+        percent = perсent_elements[index_of_element].text().replace("%", "")
         self.logger.debug(f"got percent: {percent}")
         return percent
         
-    def _get_uv_index(self, html_parser: HTMLParser, selector: str) -> int:
-        uv_index_element = html_parser.css_first(selector).text()
+    def _get_uv_index(self, html_parser: HTMLParser, selector: str, index_of_element: int = 0) -> int:
+        uv_index_elements = html_parser.css(selector)
 
-        uv_index = re.search("^\\d{1,2}", uv_index_element).group(0)
+        if len(uv_index_elements) == 0:
+            self.logger.debug("list with uv index elements is empty")
+            raise TypeError("selector for uv index not found element")
+        
+        uv_index = re.search("^\\d{1,2}", uv_index_elements[index_of_element].text()).group(0)
         self.logger.debug(f"got uv_index: {uv_index}")
         return uv_index
     
@@ -235,8 +414,9 @@ class WeatherService:
         self.logger.debug(f'got amount_of_precipitation: {amount_of_precipitation}')
         return amount_of_precipitation
 
-    def _get_icon_name(self, html_parser: HTMLParser):
-        icon_name = html_parser.css_first(SELECTOR_FOR_HOURLY_ICON_NAME).text()
+    def _get_icon_name(self, html_parser: HTMLParser, selector: str, index_of_element: int = 0):
+        icon_name_element = html_parser.css(selector)[index_of_element]
+        icon_name = icon_name_element.text()
         self.logger.debug(f'got icon_name: {icon_name}')
         return icon_name
 
