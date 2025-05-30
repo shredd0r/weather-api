@@ -14,5 +14,5 @@
 ```
 4. Run project
 ```bash
-    fastapi dev  
+    make start_prod
 ```

@@ -1,7 +1,7 @@
 from logging import Logger
 from typing import List
 import requests
-from models import GetSunV3LocationSearchRequest, GetSunV3LocationSearchResponse
+from .models import GetSunV3LocationSearchRequest, GetSunV3LocationSearchResponse
 
 
 class WeatherClient:

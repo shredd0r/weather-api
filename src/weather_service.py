@@ -8,8 +8,8 @@ from selectolax.parser import HTMLParser
 from selectolax.parser import Node
 import time
 
-from models import Celestial, CurrentWeatherForecast, DailyWeatherForecast, DailyWeatherForecastDetail, GetLocationSearchRequest, GetSunV3LocationSearchRequest, HourlyWeatherForecast, Location, PrecipitationType, UnitType, WeatherForecastRequest, Wind
-from weather_client import WeatherClient
+from .models import Celestial, CurrentWeatherForecast, DailyWeatherForecast, DailyWeatherForecastDetail, GetLocationSearchRequest, GetSunV3LocationSearchRequest, HourlyWeatherForecast, Location, PrecipitationType, UnitType, WeatherForecastRequest, Wind
+from .weather_client import WeatherClient
 
 # localization = standard 'BCP 47': uk-UA, 
 # interval = today / hourbyhour / tenday, 
