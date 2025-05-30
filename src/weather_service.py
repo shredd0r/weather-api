@@ -25,6 +25,20 @@ CURRENT_FORECAST_INTERVAL = "today"
 HOULY_FORECAST_INTERVAL = "hourbyhour"
 DAILY_FORECAST_INTERVAL = "tenday"
 
+
+r"""
+    This selectors using for get volumes from weather forecast page.
+    Way for get all volumes:
+        1. Get block where stored all weather forecast info
+        2. Get volumes using relative selector by block info
+        3. If need, convert or calculter received volumes
+
+    For example, get probability of precipitation from daily weather forecast page.
+    First get block with detail info about day weather forecast. After that get from this block needed volume
+
+    detail_block = daily_page.css_first(SELECTOR_FOR_DAILY_PROBABILITY_OF_PRECIPITATION)
+    pop = detail_block.css_first(SELECTOR_FOR_HOURLY_PROBABILITY_OF_PRECIPITATION) 
+"""
 SELECTOR_FOR_CURRENT_FEELS_LIKE_TEMPERATURE = 'span[class*="TodayDetailsCard--feelsLikeTempValue--"][data-testid="TemperatureValue"]'
 SELECTOR_FOR_CURRENT_CURRENT_TEMPERATURE = 'span[class*="CurrentConditions--tempValue--"][data-testid="TemperatureValue"]'
 SELECTOR_FOR_CURRENT_MAX_TEMPERATURE = 'div[class*="CurrentConditions--tempHiLoValue"] > span[data-testid="TemperatureValue"]:first-child'
@@ -45,7 +59,6 @@ SELECTOR_FOR_HOURLY_PRECIPITATION_TYPE = 'li[class*="DetailsTable--listItem--"][
 SELECTOR_FOR_DAILY_LAST_UPDATED_TIME = 'div[class*="DailyForecast--timestamp--"]'
 SELECTOR_FOR_DAILY_BLOCK_SUMMARY_FORECAST = 'div[class*="DetailsSummary--DetailsSummary--"]'
 SELECTOR_FOR_DAILY_BLOCK_DETAIL_TABLE_FORECAST = 'div[class*="DaypartDetails--Content--"]'
-SELECTOR_FOR_DAILY_BLOCK_CONTENT = 'div[class*="DailyContent--DailyContent--"]'
 SELECTOR_FOR_DAILY_DETAILS_TABLE = 'div[class*="DaypartDetails--DetailsTable--"]'
 SELECTOR_FOR_DAILY_TEMPERATURE = 'span[class*="DailyContent--temp--"][data-testid="TemperatureValue"]'
 SELECTOR_FOR_DAILY_PROBABILITY_OF_PRECIPITATION = 'span[class*="DailyContent--value--"][data-testid="PercentageValue"]'
@@ -88,15 +101,15 @@ class WeatherService:
 
         self.logger.info("start getting current weather forecast")
         url = self._get_url_for_get_weather_page(CURRENT_FORECAST_INTERVAL, request)
-        html_parser = self._get_html_parser_for_weather_page(url)
+        current_weather_page = self._get_html_parser_for_weather_page(url)
         
         epoch_time = int(time.time())
-        visibility = self._get_current_visibility(html_parser)
-        feels_like_temperature = self._get_temperature_by(html_parser, SELECTOR_FOR_CURRENT_FEELS_LIKE_TEMPERATURE)
-        current_temperature = self._get_temperature_by(html_parser, SELECTOR_FOR_CURRENT_CURRENT_TEMPERATURE)
-        min_temperature = self._get_temperature_by(html_parser, SELECTOR_FOR_CURRENT_MIN_TEMPERATURE)
-        max_temperature = self._get_temperature_by(html_parser, SELECTOR_FOR_CURRENT_MAX_TEMPERATURE)
-        icon_name = self._get_current_icon_name(html_parser)
+        visibility = self._get_current_visibility(current_weather_page)
+        feels_like_temperature = self._get_temperature_by(current_weather_page, SELECTOR_FOR_CURRENT_FEELS_LIKE_TEMPERATURE)
+        current_temperature = self._get_temperature_by(current_weather_page, SELECTOR_FOR_CURRENT_CURRENT_TEMPERATURE)
+        min_temperature = self._get_temperature_by(current_weather_page, SELECTOR_FOR_CURRENT_MIN_TEMPERATURE)
+        max_temperature = self._get_temperature_by(current_weather_page, SELECTOR_FOR_CURRENT_MAX_TEMPERATURE)
+        icon_name = self._get_current_icon_name(current_weather_page)
         
         self.logger.info("current weather forecast successful formed")
         return CurrentWeatherForecast(epoch_time= epoch_time,
@@ -122,11 +135,11 @@ class WeatherService:
 
         self.logger.debug("start getting hourly weather forecast")
         url = self._get_url_for_get_weather_page(HOULY_FORECAST_INTERVAL, request)
-        html_parser = self._get_html_parser_for_weather_page(url)
+        hourly_weather_page = self._get_html_parser_for_weather_page(url)
 
         hourly_weather_forecasts = []
-        hourly_summary_nodes = html_parser.css(SELECTOR_FOR_HOURLY_BLOCK_SUMMARY_FORECAST)
-        hourly_detail_nodes = html_parser.css(SELECTOR_FOR_HOURLY_BLOCK_DETAIL_TABLE_FORECAST)
+        hourly_summary_nodes = hourly_weather_page.css(SELECTOR_FOR_HOURLY_BLOCK_SUMMARY_FORECAST)
+        hourly_detail_nodes = hourly_weather_page.css(SELECTOR_FOR_HOURLY_BLOCK_DETAIL_TABLE_FORECAST)
 
         for i in range(len(hourly_summary_nodes)):
             epoch_time=0 # TODO
@@ -168,11 +181,11 @@ class WeatherService:
 
         self.logger.debug("start getting daily weather forecast")
         url = self._get_url_for_get_weather_page(DAILY_FORECAST_INTERVAL, request)
-        html_parser = self._get_html_parser_for_weather_page(url)
+        daily_weather_page = self._get_html_parser_for_weather_page(url)
 
         daily_weather_forecasts = []
-        daily_summary_nodes = html_parser.css(SELECTOR_FOR_DAILY_BLOCK_SUMMARY_FORECAST)
-        daily_detail_nodes = html_parser.css(SELECTOR_FOR_DAILY_BLOCK_DETAIL_TABLE_FORECAST)
+        daily_summary_nodes = daily_weather_page.css(SELECTOR_FOR_DAILY_BLOCK_SUMMARY_FORECAST)
+        daily_detail_nodes = daily_weather_page.css(SELECTOR_FOR_DAILY_BLOCK_DETAIL_TABLE_FORECAST)
 
         r"""
             For first element need check local time, because backend return only night block between time 15:00 - 03:00
@@ -183,7 +196,7 @@ class WeatherService:
 
         start_index = 0
         day = self._get_day_from_daily_detail(daily_detail_nodes[0])
-        last_updated_time = self._get_local_last_updated_time(html_parser, SELECTOR_FOR_DAILY_LAST_UPDATED_TIME)
+        last_updated_time = self._get_local_last_updated_time(daily_weather_page, SELECTOR_FOR_DAILY_LAST_UPDATED_TIME)
         epoch_time = self._get_local_datetime_by(day, last_updated_time)
         local_time_seconds = self._get_seconds_by_time(last_updated_time)
         if self._is_night(local_time_seconds):
@@ -232,28 +245,36 @@ class WeatherService:
         pass
     
     def _get_local_datetime_by(self, day: int, time: datetime.time) -> datetime.datetime:
+        self.logger.debug(f'start formatting local datetime by: day={day}, time={time}')
         current_datetime = datetime.datetime.now()
         local_datetime = datetime.datetime(year= current_datetime.year, 
                                            month=current_datetime.month,
                                            day=day,
                                            hour=time.hour,
-                                           minute=time.minute)
+                                           minute=time.minute).timestamp() * 1000
 
-        return local_datetime.timestamp() * 1000
+        self.logger.debug(f"formated local datetime: {local_datetime}")
+        return local_datetime 
     
     def _get_local_last_updated_time(self, html_page: HTMLParser, selector) -> datetime.time:
         # Will be returned like: 'As of 03:48 GMT-03:00'
+        self.logger.debug("start get local last updated time")
         last_updated_str = html_page.css_first(selector).text()
-
+        
         # This regex will be return '03:48' from string: 'As of 03:48 GMT-03:00'
-        time_str = re.search(r'(?<=\s)\d{2}:\d{2}', last_updated_str).group(0)
+        self.logger.debug(f"found last updated time: {last_updated_str}")
+        time_str = re.search(r'(?<=\s)\d{1,2}:\d{2}', last_updated_str).group(0)
+        
+        self.logger.debug(f"regex return: {time_str} time")
         return  datetime.datetime.strptime(time_str, "%H:%M").time()
 
     def _get_day_from_daily_detail(self, detail_node: Node) -> int:
+        self.logger.debug('start get day from daily detail')
         day_with_week_name = detail_node.css_first(SELECTOR_FOR_DAILY_DAY).text()
-
+        self.logger.debug(f'returned day with week: {day_with_week_name}')
         # Will be return '01' from 'Thu 01'
         day = re.search(r"\d{2}", day_with_week_name).group(0)
+        self.logger.debug(f'found day number: {day}')
         return int(day)
         
     def _is_night(self, time_in_seconds: int) -> bool:
@@ -426,8 +447,8 @@ class WeatherService:
         self.logger.debug(f"got uv_index: {uv_index}")
         return uv_index
     
-    def _get_current_icon_name(self, html_parser: HTMLParser):
-        icon_name = html_parser.css_first(SELECTOR_FOR_CURRENT_ICON_NAME).text()
+    def _get_current_icon_name(self, current_weather_page: HTMLParser):
+        icon_name = current_weather_page.css_first(SELECTOR_FOR_CURRENT_ICON_NAME).text()
         self.logger.debug(f"got icon_name: {icon_name}")
         return icon_name
     
@@ -442,9 +463,9 @@ class WeatherService:
         self.logger.debug(f'got icon_name: {icon_name}')
         return icon_name
 
-    def _get_current_visibility(self, html_parser: HTMLParser):
+    def _get_current_visibility(self, current_weather_page: HTMLParser):
         self.logger.debug("try get visibility node for current weather")
-        visibility_node = html_parser.css_first(SELECTOR_FOR_CURRENT_VISIBILITY)
+        visibility_node = current_weather_page.css_first(SELECTOR_FOR_CURRENT_VISIBILITY)
 
         if type(visibility_node) == NoneType:
             self.logger.debug("visibility is unlimited, return '0'")
