@@ -9,7 +9,7 @@ class WeatherClient:
         WeatherClient has methods for call 'The Weather Channel' backend
     """
     def __init__(self, logger: Logger):
-        self.logger = logger
+        self.logger = logger.getChild("weather-client")
 
     def get_sun_location_search(self, request: GetSunV3LocationSearchRequest) -> List[GetSunV3LocationSearchResponse]:
         r"""
@@ -48,17 +48,17 @@ class WeatherClient:
         self.logger.debug("start map received response to 'GetSunV3LocationSearchResponse'")
         for i in range(len(place_infos["address"])):
             self.logger.debug(f"mapping place_info= {i}")
-            locations.append(GetSunV3LocationSearchResponse(place_infos["address"][i], 
-                                                          place_infos["adminDistrict"][i],
-                                                          place_infos["city"][i],
-                                                          place_infos["country"][i],
-                                                          place_infos["countryCode"][i],
-                                                          place_infos["displayName"][i],
-                                                          place_infos["ianaTimeZone"][i],
-                                                          place_infos["latitude"][i],
-                                                          place_infos["longitude"][i],
-                                                          place_infos["placeId"][i],
-                                                          place_infos["postalCode"][i]))
+            locations.append(GetSunV3LocationSearchResponse(address=place_infos["address"][i], 
+                                                            admin_district=place_infos["adminDistrict"][i],
+                                                            city=place_infos["city"][i],
+                                                            country=place_infos["country"][i],
+                                                            country_code=place_infos["countryCode"][i],
+                                                            display_name=place_infos["displayName"][i],
+                                                            iana_time_zone=place_infos["ianaTimeZone"][i],
+                                                            latitude=place_infos["latitude"][i],
+                                                            longitude=place_infos["longitude"][i],
+                                                            place_id=place_infos["placeId"][i],
+                                                            postal_code=place_infos["postalCode"][i]))
         
         self.logger.debug('return mapped locations')
         return locations

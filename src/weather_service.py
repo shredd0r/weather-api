@@ -8,7 +8,8 @@ from selectolax.parser import HTMLParser
 from selectolax.parser import Node
 import time
 
-from models import Celestial, CurrentWeatherForecast, DailyWeatherForecast, DailyWeatherForecastDetail, GetLocationSearchRequest, HourlyWeatherForecast, Location, PrecipitationType, UnitType, WeatherForecastRequest, Wind
+from models import Celestial, CurrentWeatherForecast, DailyWeatherForecast, DailyWeatherForecastDetail, GetLocationSearchRequest, GetSunV3LocationSearchRequest, HourlyWeatherForecast, Location, PrecipitationType, UnitType, WeatherForecastRequest, Wind
+from weather_client import WeatherClient
 
 # localization = standard 'BCP 47': uk-UA, 
 # interval = today / hourbyhour / tenday, 
@@ -83,9 +84,9 @@ class WeatherService:
         WeatherService has methods for return weather forecast by interval or search placeId using apies 'The Weather Channel'
     """
 
-    def __init__(self, logger: logging.Logger):
-        self.logger = logger.getChild("weather-service")
-        self.logger.setLevel(logging.DEBUG)
+    def __init__(self, logger: logging.Logger, weather_client: WeatherClient):
+        self._logger = logger.getChild("weather-service")
+        self._weather_client = weather_client
 
     def get_current_weather(self, request: WeatherForecastRequest) -> CurrentWeatherForecast:
         r"""
@@ -99,7 +100,7 @@ class WeatherService:
                     unit_type: UnitType
         """
 
-        self.logger.info("start getting current weather forecast")
+        self._logger.info("start getting current weather forecast")
         url = self._get_url_for_get_weather_page(CURRENT_FORECAST_INTERVAL, request)
         current_weather_page = self._get_html_parser_for_weather_page(url)
         
@@ -111,7 +112,7 @@ class WeatherService:
         max_temperature = self._get_temperature_by(current_weather_page, SELECTOR_FOR_CURRENT_MAX_TEMPERATURE)
         icon_name = self._get_current_icon_name(current_weather_page)
         
-        self.logger.info("current weather forecast successful formed")
+        self._logger.info("current weather forecast successful formed")
         return CurrentWeatherForecast(epoch_time= epoch_time,
                                       visibility= visibility,
                                       current_temperature= current_temperature,
@@ -133,7 +134,7 @@ class WeatherService:
                     unit_type: UnitType
         """
 
-        self.logger.debug("start getting hourly weather forecast")
+        self._logger.debug("start getting hourly weather forecast")
         url = self._get_url_for_get_weather_page(HOULY_FORECAST_INTERVAL, request)
         hourly_weather_page = self._get_html_parser_for_weather_page(url)
 
@@ -179,7 +180,7 @@ class WeatherService:
             after 15:00 local time, first element daily weather forecast return only for night 
         """
 
-        self.logger.debug("start getting daily weather forecast")
+        self._logger.debug("start getting daily weather forecast")
         url = self._get_url_for_get_weather_page(DAILY_FORECAST_INTERVAL, request)
         daily_weather_page = self._get_html_parser_for_weather_page(url)
 
@@ -242,10 +243,24 @@ class WeatherService:
                     place_details: str - string with detail information about your place, for example: city name, postcode, address etc
 
         """
-        pass
+        list_of_found_locations = self._weather_client.get_sun_location_search(GetSunV3LocationSearchRequest(language=request.localization,
+                                                                                                             place_detail=request.place_details))
+        locations_for_response = []
+        for location in list_of_found_locations:
+            locations_for_response.append(
+                Location(
+                    place_id=location.place_id,
+                    address=location.address,
+                    city=location.city,
+                    country=location.country,
+                    latitude=location.latitude,
+                    longitude=location.longitude,
+                    postal_code=location.postal_code))
+        
+        return locations_for_response
     
     def _get_local_datetime_by(self, day: int, time: datetime.time) -> datetime.datetime:
-        self.logger.debug(f'start formatting local datetime by: day={day}, time={time}')
+        self._logger.debug(f'start formatting local datetime by: day={day}, time={time}')
         current_datetime = datetime.datetime.now()
         local_datetime = datetime.datetime(year= current_datetime.year, 
                                            month=current_datetime.month,
@@ -253,28 +268,28 @@ class WeatherService:
                                            hour=time.hour,
                                            minute=time.minute).timestamp() * 1000
 
-        self.logger.debug(f"formated local datetime: {local_datetime}")
+        self._logger.debug(f"formated local datetime: {local_datetime}")
         return local_datetime 
     
     def _get_local_last_updated_time(self, html_page: HTMLParser, selector) -> datetime.time:
         # Will be returned like: 'As of 03:48 GMT-03:00'
-        self.logger.debug("start get local last updated time")
+        self._logger.debug("start get local last updated time")
         last_updated_str = html_page.css_first(selector).text()
         
         # This regex will be return '03:48' from string: 'As of 03:48 GMT-03:00'
-        self.logger.debug(f"found last updated time: {last_updated_str}")
+        self._logger.debug(f"found last updated time: {last_updated_str}")
         time_str = re.search(r'(?<=\s)\d{1,2}:\d{2}', last_updated_str).group(0)
         
-        self.logger.debug(f"regex return: {time_str} time")
+        self._logger.debug(f"regex return: {time_str} time")
         return  datetime.datetime.strptime(time_str, "%H:%M").time()
 
     def _get_day_from_daily_detail(self, detail_node: Node) -> int:
-        self.logger.debug('start get day from daily detail')
+        self._logger.debug('start get day from daily detail')
         day_with_week_name = detail_node.css_first(SELECTOR_FOR_DAILY_DAY).text()
-        self.logger.debug(f'returned day with week: {day_with_week_name}')
+        self._logger.debug(f'returned day with week: {day_with_week_name}')
         # Will be return '01' from 'Thu 01'
         day = re.search(r"\d{2}", day_with_week_name).group(0)
-        self.logger.debug(f'found day number: {day}')
+        self._logger.debug(f'found day number: {day}')
         return int(day)
         
     def _is_night(self, time_in_seconds: int) -> bool:
@@ -288,21 +303,21 @@ class WeatherService:
         precipitation_type_title = html_parser.css(selector)[index_of_element]
 
         if type(precipitation_type_title) == NoneType:
-            self.logger.debug("title of precipitation type not found, return type 'NONE'")
+            self._logger.debug("title of precipitation type not found, return type 'NONE'")
             return PrecipitationType.NONE
         
         precipitation_type_text = precipitation_type_title.text()
 
         if "Rain" in precipitation_type_text:
-            self.logger.debug("title of precipitation type is rain, return 'RAIN'")
+            self._logger.debug("title of precipitation type is rain, return 'RAIN'")
             return PrecipitationType.RAIN
         
         if "Mixed" in precipitation_type_text:
-            self.logger.debug("title of precipitation type is mixed, return 'MIXED'")
+            self._logger.debug("title of precipitation type is mixed, return 'MIXED'")
             return PrecipitationType.MIXED
         
         if "Snowflake" == precipitation_type_text:
-            self.logger.debug("title of precipitation type is mixed, return 'SNOW'")
+            self._logger.debug("title of precipitation type is mixed, return 'SNOW'")
             return PrecipitationType.SNOW
 
         return PrecipitationType.ICE
@@ -325,7 +340,7 @@ class WeatherService:
         wind_volumes = wind_element.css(f"span:not({SELECTOR_FOR_WIND})")
         direction = wind_volumes[0].text()[:-1]
         speed = wind_volumes[1].text()
-        self.logger.debug(f"got direction: {direction}, speed: {speed}")
+        self._logger.debug(f"got direction: {direction}, speed: {speed}")
         return Wind(direction= direction, 
                     speed= speed)
 
@@ -355,15 +370,15 @@ class WeatherService:
                                          unit= self._map_unit_type(request.unit_type))
         
     def _get_html_parser_for_weather_page(self, url: str) -> HTMLParser:
-        self.logger.debug(f"prepared request for get weather page, url: {url}")
+        self._logger.debug(f"prepared request for get weather page, url: {url}")
         weather_forecast_page = requests.get(url).text
         html_parser = HTMLParser(weather_forecast_page)
 
         if self._page_is_not_found(html_parser):
-            self.logger.debug("server return page with 'not_found' error")
+            self._logger.debug("server return page with 'not_found' error")
             raise requests.RequestException("invalid request volumes")
 
-        self.logger.debug("got html parser for weather page")
+        self._logger.debug("got html parser for weather page")
 
         return html_parser
 
@@ -391,7 +406,7 @@ class WeatherService:
         time_str_elements = node.css(SELECTOR_FOR_DAILY_RISE_SET_TIME)
 
         if len(time_str_elements) == 0:
-            self.logger.debug("selector for celestial not found elements")
+            self._logger.debug("selector for celestial not found elements")
             raise TypeError("selector for celestial not found elements")
 
 
@@ -411,64 +426,64 @@ class WeatherService:
         return type(not_found_node) != NoneType
 
     def _get_temperature_by(self, html_parser: HTMLParser, selector: str, element_index: int = 0):
-        self.logger.debug(f"try return temperature by selector:{selector}")
+        self._logger.debug(f"try return temperature by selector:{selector}")
         temperature_elements = html_parser.css(selector)
-        self.logger.debug(f"temperatures: {temperature_elements[0].text()}")
+        self._logger.debug(f"temperatures: {temperature_elements[0].text()}")
 
         if len(temperature_elements) == 0:
-            self.logger.debug("list with temperature element is empty")
+            self._logger.debug("list with temperature element is empty")
             raise TypeError("selector for temperature not found elements")
 
         # Remove degree symbol from text
         temperature = temperature_elements[element_index].text().replace("°", "")
-        self.logger.debug(f"got temperature: {temperature}")
+        self._logger.debug(f"got temperature: {temperature}")
         return temperature
 
     def _get_percent_by(self, html_parser: HTMLParser, selector: str, index_of_element: int = 0) -> int:
-        self.logger.debug(f"try return percent by selector:{selector}")
+        self._logger.debug(f"try return percent by selector:{selector}")
         perсent_elements = html_parser.css(selector)
 
         if len(perсent_elements) == 0:
-            self.logger.debug("list with percent element is empty")
+            self._logger.debug("list with percent element is empty")
             raise TypeError("selector for percent not found elements")
         
         percent = perсent_elements[index_of_element].text().replace("%", "")
-        self.logger.debug(f"got percent: {percent}")
+        self._logger.debug(f"got percent: {percent}")
         return percent
         
     def _get_uv_index(self, html_parser: HTMLParser, selector: str, index_of_element: int = 0) -> int:
         uv_index_elements = html_parser.css(selector)
 
         if len(uv_index_elements) == 0:
-            self.logger.debug("list with uv index elements is empty")
+            self._logger.debug("list with uv index elements is empty")
             raise TypeError("selector for uv index not found element")
         
         uv_index = re.search("^\\d{1,2}", uv_index_elements[index_of_element].text()).group(0)
-        self.logger.debug(f"got uv_index: {uv_index}")
+        self._logger.debug(f"got uv_index: {uv_index}")
         return uv_index
     
     def _get_current_icon_name(self, current_weather_page: HTMLParser):
         icon_name = current_weather_page.css_first(SELECTOR_FOR_CURRENT_ICON_NAME).text()
-        self.logger.debug(f"got icon_name: {icon_name}")
+        self._logger.debug(f"got icon_name: {icon_name}")
         return icon_name
     
     def _get_amount_of_precipitation(self, html_parser: HTMLParser):
         amount_of_precipitation = html_parser.css_first(SELECTOR_FOR_HOURLY_AMOUNT_OF_PRECIPITATION).text()
-        self.logger.debug(f'got amount_of_precipitation: {amount_of_precipitation}')
+        self._logger.debug(f'got amount_of_precipitation: {amount_of_precipitation}')
         return amount_of_precipitation
 
     def _get_icon_name(self, html_parser: HTMLParser, selector: str, index_of_element: int = 0):
         icon_name_element = html_parser.css(selector)[index_of_element]
         icon_name = icon_name_element.text()
-        self.logger.debug(f'got icon_name: {icon_name}')
+        self._logger.debug(f'got icon_name: {icon_name}')
         return icon_name
 
     def _get_current_visibility(self, current_weather_page: HTMLParser):
-        self.logger.debug("try get visibility node for current weather")
+        self._logger.debug("try get visibility node for current weather")
         visibility_node = current_weather_page.css_first(SELECTOR_FOR_CURRENT_VISIBILITY)
 
         if type(visibility_node) == NoneType:
-            self.logger.debug("visibility is unlimited, return '0'")
+            self._logger.debug("visibility is unlimited, return '0'")
             # Searching by selector SELECTOR_FOR_VISIBILITY return NoneType, because in the web, if visibility unlimited, display string `Unlimited`
             return 0
         
