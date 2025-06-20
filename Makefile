@@ -8,3 +8,7 @@ start_prod:
 start_dev:
 	make activate_env
 	uvicorn src.main:app --reload --port 8000 --log-level debug
+
+test:
+	make activate_env
+	python3 -m tests.weather_service_test
