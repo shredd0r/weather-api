@@ -55,7 +55,7 @@ def hourly_weather(place_id: str, language: str, unit_type: int) -> List[HourlyW
 
         Request:
             - place_id    - required string thats describe place. See api /location/search
-            - localizaion - localization string in standard 'BCP 47'. For example: 'uk-UA'
+            - language    - language string in standard 'BCP 47'. For example: 'uk-UA'
             - unit_type   - type of unit format. See enum UnitType on models.py
         
         Response:

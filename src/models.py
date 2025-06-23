@@ -62,7 +62,7 @@ class DailyWeatherForecast(BaseModel):
 
 class WeatherForecastRequest(BaseModel):
     place_id: str
-    localization: str
+    language: str
     unit_type: UnitType
 
 class GetLocationSearchRequest(BaseModel):

@@ -11,11 +11,11 @@ import time
 from .models import Celestial, CurrentWeatherForecast, DailyWeatherForecast, DailyWeatherForecastDetail, GetLocationSearchRequest, GetSunV3LocationSearchRequest, HourlyWeatherForecast, Location, PrecipitationType, UnitType, WeatherForecastRequest, Wind
 from .weather_client import WeatherClient
 
-# localization = standard 'BCP 47': uk-UA, 
+# language = standard 'BCP 47': uk-UA, 
 # interval = today / hourbyhour / tenday, 
 # place_id = 0b8697c01baca04214b4abd206319d3eba60db5fb05c191012c4e02f6bdb23a4, 
 # unit = m / e / h
-WEATHER_URL_FORMAT = "https://weather.com/{localization}/weather/{interval}/l/{place_id}?unit={unit}"
+WEATHER_URL_FORMAT = "https://weather.com/{language}/weather/{interval}/l/{place_id}?unit={unit}"
 
 # unit type on the weather channel backend
 METRIC_UNIT_TYPE = "m"
@@ -25,7 +25,6 @@ HYBRID_UNIT_TYPE = "h"
 CURRENT_FORECAST_INTERVAL = "today"
 HOULY_FORECAST_INTERVAL = "hourbyhour"
 DAILY_FORECAST_INTERVAL = "tenday"
-
 
 r"""
     This selectors using for get volumes from weather forecast page.
@@ -78,6 +77,9 @@ INDEX_FOR_SECOND_DAILY_BLOCK = 1
 
 SECONDS_IN_DAY = 24 * 60 * 60
 
+class NotFoundException(BaseException):
+    def __init__(self):
+        super().__init__("server return not found page")
 
 class WeatherService:
     r"""
@@ -96,7 +98,7 @@ class WeatherService:
             Request:
                 WeatherForecastRequest:
                     place_id: str - id which you can get from WeatherClient.get_sun_location_search()
-                    localization: str - localization string in standard 'BCP 47'. For example: 'uk-UA'
+                    language: str - language string in standard 'BCP 47'. For example: 'uk-UA'
                     unit_type: UnitType
         """
 
@@ -130,7 +132,7 @@ class WeatherService:
             Request:
                 WeatherForecastRequest:
                     place_id: str - id which you can get from WeatherClient.get_sun_location_search()
-                    localization: str - localization string in standard 'BCP 47'. For example: 'uk-UA'
+                    language: str - language string in standard 'BCP 47'. For example: 'uk-UA'
                     unit_type: UnitType
         """
 
@@ -174,7 +176,7 @@ class WeatherService:
             Request:
                 WeatherForecastRequest:
                     place_id: str - id which you can get from WeatherClient.get_sun_location_search()
-                    localization: str - localization string in standard 'BCP 47'. For example: 'uk-UA'
+                    language: str - language string in standard 'BCP 47'. For example: 'uk-UA'
                     unit_type: UnitType
             
             after 15:00 local time, first element daily weather forecast return only for night 
@@ -364,7 +366,7 @@ class WeatherService:
             icon_name= icon_name)
 
     def _get_url_for_get_weather_page(self, interval: str, request: WeatherForecastRequest) -> str:
-        return WEATHER_URL_FORMAT.format(localization= request.localization, 
+        return WEATHER_URL_FORMAT.format(language= request.language, 
                                          interval= interval, 
                                          place_id= request.place_id,
                                          unit= self._map_unit_type(request.unit_type))
@@ -376,7 +378,7 @@ class WeatherService:
 
         if self._page_is_not_found(html_parser):
             self._logger.debug("server return page with 'not_found' error")
-            raise requests.RequestException("invalid request volumes")
+            raise NotFoundException
 
         self._logger.debug("got html parser for weather page")
 
