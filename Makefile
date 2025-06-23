@@ -11,4 +11,4 @@ start_dev:
 
 test:
 	make activate_env
-	python3 -m tests.weather_service_test
+	python3 -m unittest tests.main
