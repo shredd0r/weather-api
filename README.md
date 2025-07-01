@@ -20,5 +20,5 @@ For details about apies, see src/main.py You can find controllers for all apies 
 ```
 2. Start image
 ```bash
-    docker run -p 8000:8000 {image_id}
+    docker run -p 8000:8000 weather-api:v1.0.0
 ```
